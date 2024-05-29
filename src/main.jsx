@@ -7,15 +7,11 @@ import { ThemeProvider } from "@material-tailwind/react";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-        <BrowserRouter>
-            <ThemeProvider>
-                <QueryClientProvider client={new QueryClient()}>
-                    <App />
-                </QueryClientProvider>
-            </ThemeProvider>
-        </BrowserRouter>
-    </React.StrictMode>,
+    <BrowserRouter>
+        <ThemeProvider>
+            <QueryClientProvider client={new QueryClient()}>
+                <App />
+            </QueryClientProvider>
+        </ThemeProvider>
+    </BrowserRouter>
 )
-                    // <GlobalContextProvider>
-                    // </GlobalContextProvider>

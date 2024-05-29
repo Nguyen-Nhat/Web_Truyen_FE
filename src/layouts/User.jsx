@@ -8,8 +8,8 @@ export function User(){
 			<Header/>
 			<Routes>
 				<Route path="/" element={<Home/>}/>
-				<Route path="/story/:id" element={<StoryOverview/>}/>
-				<Route path="/story/:id/:chap" element={<StoryDetail/>}/>
+				<Route path="/story/:name" element={<StoryOverview/>}/>
+				<Route path="/story/:name/:chap" element={<StoryDetail/>}/>
 				<Route path="/search" element={<Search/>}/>
 				<Route path="*" element={<NotFound/>}/>
 			</Routes>

@@ -10,6 +10,6 @@ export const BookService = {
             },
 		});
 		const data = await res.json();
-        return data;
+        return data.data;
 	}
 }
