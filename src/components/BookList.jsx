@@ -25,11 +25,12 @@ export function BookList({title, books}) {
 					const differenceInTime = currentDate.getTime() - lastUpdatedDate.getTime();
 					const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
 
+					const encodedUrl = btoa(book.url);
 					return (
 						<div className='flex items-center h-[74px] border-b my-1' key={i}>
 							<img src={book.coverImage} alt={book.title} className='w-[74px] h-[74px]' />
 							<div className='ml-4'>
-								<Link to={`/story/${book.title}`} className='hover:underline'>
+								<Link to={`/story/${encodedUrl}`} className='hover:underline'>
 									<Typography className='text-base'>{book.title}</Typography>
 								</Link>
 								<div className='flex items-center'>

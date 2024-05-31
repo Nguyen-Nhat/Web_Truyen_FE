@@ -1,10 +1,11 @@
 import { useParams } from 'react-router-dom';
 import { Breadcrumb } from '../../components';
 export const StoryDetail = ()=>{
-	const {name, chap} = useParams();
+	const {encodedUrl, chap} = useParams();
 	const breadcrumbItems = [
-        { name: `${name}`, link: `/story/${name}` },
-        { name: `${chap}`, link: `/story/${name}/${chap}` },
+		// mã hóa rồi lấy tên hay gì gán vô
+        // { name: `${name}`, link: `/story/${name}` },
+        // { name: `${chap}`, link: `/story/${name}/${chap}` },
     ];
 	return (
 		<div 

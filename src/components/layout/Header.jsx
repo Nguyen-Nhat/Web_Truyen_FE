@@ -1,4 +1,4 @@
-import {useState,useEffect} from "react";
+import {useState,useEffect, useContext} from "react";
 import {
     Navbar,
     Typography,
@@ -7,11 +7,12 @@ import {
 import {BookOpenIcon,MagnifyingGlassIcon} from "@heroicons/react/24/outline";
 import {useNavigate,Link} from "react-router-dom";
 import { ServerService } from "../../utils/ServerService";
+import { ServerContext } from "../../context/ServerContext";
 export function Header(){
 	const navigate = useNavigate();
 	const [searchString, setSearchString] = useState('');
 	const [servers, setServers] = useState([]);
-	const [server, setServer] = useState('');
+	const {server, setServer} = useContext(ServerContext);
 	useEffect(() => {
 		const setupServer = async () => {
 			const data = await ServerService.getServers();

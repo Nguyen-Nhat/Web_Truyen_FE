@@ -10,7 +10,6 @@ export const BookService = {
             },
 		});
 		const data = await res.json();
-		console.log(res);
         return data.data;
 	},
 	searchByGenre: async (genre, page) => {
@@ -21,11 +20,18 @@ export const BookService = {
 				'Content-Type': 'application/json',
             },
 		});
-	  	if (!res.ok) {
-			throw new Error(`HTTP error! status: ${res.status}`);
-		}
 		const data = await res.json();
-		console.log(data);
         return data.data;
-	}
+	},
+	getRecommendation: async () => {
+		const server = localStorage.getItem('server');
+		const res = await fetch(`${ API_URL }/${server}/recommendation`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+            },
+		});
+		const data = await res.json();
+        return data.data;
+	},
 }

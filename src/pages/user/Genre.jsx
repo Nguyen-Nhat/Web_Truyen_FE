@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { GenreService, BookService } from '../../utils'
 import { Breadcrumb, GenreList,  BookList } from '../../components';
+import { ServerContext } from '../../context/ServerContext';
 export const Genre = ()=>{
 	const {slug} = useParams();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [books, setBooks] = useState([]);
 	const [genres, setGenres] = useState([]);
+	const { server } = useContext(ServerContext);
 	
 	const breadcrumbItems = [
         { name: `Thể loại`, link: `/genre/${slug}` },
@@ -28,7 +30,7 @@ export const Genre = ()=>{
 
 		getSearchResult()
 		getGenres();
-	},[slug,searchParams]); 
+	},[slug,searchParams, server]); 
 	return (
 		<div className='mx-auto max-w-[1000px] mt-[20px]'>
 			<Breadcrumb items={breadcrumbItems} />
