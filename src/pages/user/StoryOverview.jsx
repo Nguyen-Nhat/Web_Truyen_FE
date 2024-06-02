@@ -1,7 +1,7 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Breadcrumb } from '../../components';
 import {
-	Typography
+	Typography, CardFooter
 } from "@material-tailwind/react"
 import { StarIcon } from "@heroicons/react/24/solid";
 import { UserIcon } from "@heroicons/react/24/solid";
@@ -15,15 +15,20 @@ import { useState, useEffect, useContext } from 'react';
 import { ServerContext } from '../../context/ServerContext';
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Pagination } from '../../components/Pagination'
 
 export const StoryOverview = () => {
 	const { encodedUrl } = useParams();
+	const location = useLocation();
+
+	const queryParams = new URLSearchParams(location.search);
+	const page = queryParams.get('page') || 1;
+
 	const [overviewService, setoverviewService] = useState([]);
 	const decodeUrl = atob(encodedUrl);
 	const { server } = useContext(ServerContext);
 
-
-
+	const [chapterInforByPage, setChapterInfor] = useState([]);
 	const [booksReconmend, setBooks] = useState([]);
 
 	useEffect(() => {
@@ -35,17 +40,20 @@ export const StoryOverview = () => {
 			const data = await OverviewService.getOverviewService(decodeUrl);
 			if (data) setoverviewService(data);
 		}
+		const getChapterInfor = async () => {
+			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
+			if (data) setChapterInfor(data);
+		}
 		getOverviewParams()
 		getRecommendation();
-	}, [server]);
-
+		getChapterInfor();
+	}, [server, page]);
 	const randomBooksReconmend = booksReconmend.sort(() => 0.5 - Math.random()).slice(0, 5);
 
 
 	const breadcrumbItems = [
 		{ name: `${overviewService.title}`, link: `/story/${encodedUrl}` },
 	];
-
 	const navigate = useNavigate();
 
 	const targetRef = useRef(null);
@@ -53,8 +61,7 @@ export const StoryOverview = () => {
 	const scrollToTarget = () => {
 		targetRef.current.scrollIntoView({ behavior: 'smooth' });
 	};
-
-	const chapArray = Array.from({ length: `${overviewService.maxPageOfChapter}` }, (_, index) => `${overviewService.maxPageOfChapter}` - index);
+	console.log(overviewService);
 	return (
 		<div
 			className='mx-auto w-[1000px] mt-[20px]'
@@ -118,11 +125,11 @@ export const StoryOverview = () => {
 								</div>
 								<div className="flex items-center mt-2">
 									<ArrowPathIcon className="h-6 w-6 flex-shrink-0" />
-									<Typography className='text-sl text-dark-500 ml-2'>{new Date(overviewService.updatedDate).toLocaleString()}</Typography>
+									<Typography className='text-sl text-dark-500 ml-2'>{overviewService.updatedDate ? new Date(overviewService.updatedDate).toLocaleString() : 'null'}</Typography>
 								</div>
 							</div>
 
-							<div class="col-span-3   ">
+							<div className="col-span-3   ">
 								<p className="text-sl">
 									{overviewService.description}
 								</p>
@@ -145,19 +152,14 @@ export const StoryOverview = () => {
 											alt="Image" className='w-[80px] h-[80px]' />
 										<div className="flex flex-col ml-2">
 											<Link to={`/story/${newEncodedUrl}`} className="hover:underline">
-												<Typography className='text-sm' onClick={() => window.location.href = `/story/${newEncodedUrl}`}>
+												<Typography className='text-sm'>
 													<i>{book.title}</i>
 												</Typography>
 											</Link>
 											<Typography className='text-[#2C7ABE] text-sm'>
 												<i>{book.author}</i>
 											</Typography>
-											<div className="flex items-center">
-												<StarIcon className="h-6 w-6 text-yellow-500" />
-												<Typography className='text-[#2C7ABE] text-sm'>
-													<i>Thíu :() {book.rating}/10</i>
-												</Typography>
-											</div>
+
 										</div>
 									</div>)
 							})
@@ -173,20 +175,28 @@ export const StoryOverview = () => {
 							CHƯƠNG MỚI NHẤT
 						</Typography>
 						{
-							chapArray.map((chap, i) => {
+							chapterInforByPage.map((chap, i) => {
+								let temp = chap.url;
+								if (temp.endsWith('/')) {
+									temp = temp.slice(0, -1);
+								}
+								temp = temp.substring(temp.lastIndexOf('/') + 1);
+								const encodeChap = btoa(temp);
 								return (
-									<div className="border-t border-gray-500 pt-1 pb-1 hover:bg-gray-500" onClick={() => navigate(`/story/${encodedUrl}/${chap}`)}>
+									<div className="border-t border-gray-500 pt-1 pb-1 hover:bg-gray-500" onClick={() => navigate(`/story/${encodedUrl}/${encodeChap}`)}>
 										<Typography
 											className='text-sm cursor-pointer '
 										>
-											Chương {chap}
+											{chap.title}
 										</Typography>
 									</div>
 								)
 							})
 
 						}
-
+						<CardFooter className='mx-auto -mt-4'>
+							<Pagination pageLimit={overviewService.maxPageOfChapter} />
+						</CardFooter>
 					</div>
 				</div>
 			</div>
