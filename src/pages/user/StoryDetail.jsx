@@ -3,6 +3,7 @@ import { Breadcrumb } from '../../components';
 import {useState,useEffect, useContext} from "react";
 import {Cog8ToothIcon} from "@heroicons/react/24/outline";
 import { ServerContext } from '../../context/ServerContext';
+import { ServerService } from "../../utils/ServerService";
 import { StoryDetailService } from '../../utils';
 import {
     Typography,
@@ -10,6 +11,9 @@ import {
 
 export const StoryDetail = ()=>{
 
+
+	const [servers, setServers] = useState([]);
+	const {server, setServer} = useContext(ServerContext);
 	const navigate = useNavigate();
 	const { encodedUrl, chap } = useParams();
     let decodeUrl = atob(encodedUrl);
@@ -21,8 +25,7 @@ export const StoryDetail = ()=>{
 		}
 		console.log(decodeUrl);
 	const url = useState(decodeUrl+decodeChap)[0];
-	console.log(url);
-    const { server } = useContext(ServerContext);
+	
 
 	const [Chapter, setChapter] = useState({});
 	
@@ -64,11 +67,25 @@ export const StoryDetail = ()=>{
 		location.reload();		
 	}
 
+
 	
 
 	useEffect(() => {		
 
-		
+		const setupServer = async () => {
+			const data = await ServerService.getServers();
+			setServers(data);
+			const storedServer = localStorage.getItem('server');
+			if(!storedServer || !data.includes(storedServer)){
+				localStorage.setItem('server',data[0])
+				setServer(data[0])
+			}
+			else {
+				setServer(storedServer);
+			}
+		}
+		setupServer();
+
 		const getChapter = async () => {
 			const data = await StoryDetailService.getChapter(url);
 			if (data) setChapter(data);
@@ -84,7 +101,7 @@ export const StoryDetail = ()=>{
 		localStorage.setItem('lineHeight', lineHeight);
 		localStorage.setItem('isHidden', JSON.stringify(isHidden));
 
-	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight, server])
+	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight])
 
 
 	const currentChapter = (Chapter.currentChapter != null) ? Chapter.currentChapter : false;
@@ -108,9 +125,9 @@ export const StoryDetail = ()=>{
 	
 	let index = 0;
 	if (Chapter.currentChapter != null)
-		{
-			index = Chapter.currentChapter.chapterNumber - 1;
-		}
+	{
+		index = Chapter.currentChapter.chapterNumber - 1;
+	}
 
 
 		function handleChangePrevious()
@@ -134,28 +151,35 @@ export const StoryDetail = ()=>{
 		function handleChangeNext()
 		{
 			if (Chapter.currentChapter != null)
+			{
+				if ( chapters && Chapter.currentChapter.chapterNumber < chapters.length + 1)
 				{
-					if ( chapters && Chapter.currentChapter.chapterNumber < chapters.length + 1)
-						{
-							let temp = chapters[Chapter.currentChapter.chapterNumber].url;
-							if (temp.endsWith('/')) {
-								temp = temp.slice(0, -1);
-							}
-							temp = temp.substring(temp.lastIndexOf('/') + 1);
-							const encodeChap = btoa(temp);
-							navigate(`/story/${encodedUrl}/${encodeChap}`);
-							location.reload();
-						}
+					let temp = chapters[Chapter.currentChapter.chapterNumber].url;
+					if (temp.endsWith('/')) {
+						temp = temp.slice(0, -1);
+					}
+					temp = temp.substring(temp.lastIndexOf('/') + 1);
+					const encodeChap = btoa(temp);
+					navigate(`/story/${encodedUrl}/${encodeChap}`);
+					location.reload();
 				}
+			}
 		}
+
+	const handleServerChange = ( e ) => {
+		const newServer = e.target.value;
+		localStorage.setItem('server', newServer);
+		setServer(newServer);
+		location.reload();
+	};
 
 	const handleFontSizeChange = (event) => {
 		setFontSize(event.target.value);
 	  };
 
 	  const handleShowConfigDisplay = ( e ) => {
-		setIsHidden(!isHidden);
-	};
+			setIsHidden(!isHidden);
+		};
 
 	
 	  const handleFontFamilyChange = (event) => {
@@ -201,7 +225,7 @@ export const StoryDetail = ()=>{
 						<span>{Chapter.author}</span>
 					</Typography>
 					<Typography className="text-1xl  text-center m-1" style={{ color: fontColor }}>
-						<span>{Chapter.updatedDate ? new Date(Chapter.updatedDate).toLocaleString() : 'null'}</span>
+						<span>{Chapter.date ? new Date(Chapter.date).toLocaleString() : ''}</span>
 					</Typography> 
 				</div>
 			
@@ -217,7 +241,7 @@ export const StoryDetail = ()=>{
 
 					{ chapters && (
 
-						<div className="w-[250px]  text-black m-1">
+						<div className="w-[200px]  text-black m-1">
 						<select 
 							className="w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black]"
 							onChange={handleChapterChange}
@@ -241,8 +265,30 @@ export const StoryDetail = ()=>{
 								})
 							}
 						</select>
+						
 						</div>
 					)} 
+
+						<div className="w-[100px]  text-black m-1">
+						<select 
+							className="w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black]"
+							onChange={handleServerChange}
+							value={server}
+						>
+							{
+								servers.map((s, i) => (
+									<option
+										key={i}
+										value={s}
+									>
+										{s}
+									</option>
+								))
+							}
+							
+						</select>
+						
+						</div>
 					
 
 
