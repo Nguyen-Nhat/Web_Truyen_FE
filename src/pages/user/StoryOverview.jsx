@@ -3,12 +3,7 @@ import { Breadcrumb } from '../../components';
 import {
 	Typography, CardFooter
 } from "@material-tailwind/react"
-import { StarIcon } from "@heroicons/react/24/solid";
-import { UserIcon } from "@heroicons/react/24/solid";
-import { TagIcon } from "@heroicons/react/24/solid";
-import { EyeIcon } from "@heroicons/react/24/solid";
-import { ArrowPathIcon } from "@heroicons/react/24/solid";
-import { Square2StackIcon } from "@heroicons/react/24/solid";
+import { StarIcon, UserIcon, TagIcon, EyeIcon, ArrowPathIcon, Square2StackIcon } from "@heroicons/react/24/solid";
 import { useNavigate } from 'react-router-dom';
 import { OverviewService, BookService } from '../../utils';
 import { useState, useEffect, useContext } from 'react';
@@ -30,6 +25,8 @@ export const StoryOverview = () => {
 
 	const [chapterInforByPage, setChapterInfor] = useState([]);
 	const [booksReconmend, setBooks] = useState([]);
+	const [chapterInforByPage1, setChapterInfor1] = useState([]);
+
 
 	useEffect(() => {
 		const getRecommendation = async () => {
@@ -44,10 +41,27 @@ export const StoryOverview = () => {
 			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
 			if (data) setChapterInfor(data);
 		}
+		const getChapterInfor1 = async () => {
+			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
+			if (data) setChapterInfor1(data);
+		}
+
 		getOverviewParams()
 		getRecommendation();
 		getChapterInfor();
+		getChapterInfor1();
 	}, [server, page]);
+
+	let temp1;
+	if (chapterInforByPage1 && chapterInforByPage1.length > 0) {
+		temp1 = chapterInforByPage1[0].url;
+		if (temp1.endsWith('/')) {
+			temp1 = temp1.slice(0, -1);
+		}
+		temp1 = temp1.substring(temp1.lastIndexOf('/') + 1);
+	}
+	const encodeChap1 = btoa(temp1);
+
 	const randomBooksReconmend = booksReconmend.sort(() => 0.5 - Math.random()).slice(0, 5);
 
 
@@ -61,7 +75,21 @@ export const StoryOverview = () => {
 	const scrollToTarget = () => {
 		targetRef.current.scrollIntoView({ behavior: 'smooth' });
 	};
-	console.log(overviewService);
+
+	function chuyenDoiKhongDau(chuoi) {
+		return chuoi
+			.normalize("NFD") // Chuẩn hóa ký tự Unicode
+			.replace(/[\u0300-\u036f]/g, "") // Loại bỏ dấu
+			.replace(/đ/g, 'd') // Thay thế ký tự đặc biệt "đ"
+			.replace(/Đ/g, 'D') // Thay thế ký tự đặc biệt "Đ"
+			.toLowerCase() // Chuyển thành chữ thường
+			.replace(/\s+/g, '-'); // Thay thế khoảng trắng bằng dấu gạch nối
+	}
+	let slug = overviewService.genre;
+	if (slug) {
+		let cacTu = slug.split(", ");
+		slug = chuyenDoiKhongDau(cacTu[0]);
+	}
 	return (
 		<div
 			className='mx-auto w-[1000px] mt-[20px]'
@@ -70,6 +98,7 @@ export const StoryOverview = () => {
 
 			<div className="mx-auto container ">
 				<div className="grid grid-cols-12 gap-4 ">
+
 					<div className=" col-span-9 p-4  flex flex-col" >
 						<div className="grid grid-cols-4 gap-4  border-b border-gray-500 border-dashed">
 							<div className="col-span-1  rounded-md mb-2">
@@ -77,7 +106,8 @@ export const StoryOverview = () => {
 									alt="Title" className='w-[180px] h-[180px]' />
 							</div>
 							<div className="col-span-3  ">
-								<Typography className='text-2xl text-red-500 text-center'>{overviewService.title}</Typography>
+								<Typography className='text-2xl text-red-500 text-center'>{overviewService.title ? overviewService.title.toUpperCase() : null}
+								</Typography>
 								<div className="flex items-center justify-center pb-2">
 									<Typography className='text-sm text-center '>
 										Đánh giá <span style={{ fontStyle: 'italic', fontWeight: 'bold' }}>{overviewService.rating}/10</span>
@@ -91,14 +121,14 @@ export const StoryOverview = () => {
 									<button className="bg-blue-500 text-white font-bold py-2 px-4 rounded mr-2 hover:bg-gray-500" onClick={scrollToTarget}>
 										Danh sách chương
 									</button>
-									<button className="bg-blue-500 text-white font-bold py-2 px-4 rounded ml-2 hover:bg-gray-500" onClick={() => navigate('/trangyeuthich')}>
-										Trang yêu thích
+									<button className="bg-blue-500 text-white font-bold py-2 px-4 rounded ml-2 hover:bg-gray-500" onClick={() => navigate(`/genre/${slug}`)}>
+										Truyện cùng loại
 									</button>
 								</div>
 
 								<div className="flex justify-center mt-2">
 
-									<button className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-500" onClick={() => navigate(`/story/${encodedUrl}/1`)}>
+									<button className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-500" onClick={() => navigate(`/story/${encodedUrl}/${encodeChap1}`)}>
 										Đọc từ đầu
 									</button>
 								</div>
@@ -137,7 +167,7 @@ export const StoryOverview = () => {
 						</div>
 					</div>
 
-					<div class="col-span-3  p-4 h-[550px]">
+					<div className="col-span-3  p-4 h-[550px]">
 						<Typography
 							className='text-[#2f52b2] text-lg font-semibold'
 						>
@@ -152,7 +182,7 @@ export const StoryOverview = () => {
 											alt="Image" className='w-[80px] h-[80px]' />
 										<div className="flex flex-col ml-2">
 											<Link to={`/story/${newEncodedUrl}`} className="hover:underline">
-												<Typography className='text-sm'>
+												<Typography className='text-sm' onClick={() => window.location.href = `/story/${newEncodedUrl}`}>
 													<i>{book.title}</i>
 												</Typography>
 											</Link>
@@ -177,7 +207,6 @@ export const StoryOverview = () => {
 						{
 							chapterInforByPage.map((chap, i) => {
 								let temp = chap.url;
-								console.log(temp);
 								if (temp.endsWith('/')) {
 									temp = temp.slice(0, -1);
 								}
