@@ -177,6 +177,7 @@ export const StoryOverview = () => {
 						{
 							chapterInforByPage.map((chap, i) => {
 								let temp = chap.url;
+								console.log(temp);
 								if (temp.endsWith('/')) {
 									temp = temp.slice(0, -1);
 								}

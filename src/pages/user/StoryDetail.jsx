@@ -1,24 +1,31 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Breadcrumb } from '../../components';
 import {useState,useEffect, useContext} from "react";
 import {Cog8ToothIcon} from "@heroicons/react/24/outline";
 import { ServerContext } from '../../context/ServerContext';
+import { StoryDetailService } from '../../utils';
 import {
     Typography,
     } from "@material-tailwind/react";
+
 export const StoryDetail = ()=>{
-	const {name, chap} = useParams();
-	const breadcrumbItems = [
-        { name: `${name}`, link: `/story/${name}` },
-        { name: `${chap}`, link: `/story/${name}/${chap}` },
-    ];
 
+	const navigate = useNavigate();
+	const { encodedUrl, chap } = useParams();
+    let decodeUrl = atob(encodedUrl);
+    const decodeChap = atob(chap);
+	
+	if (!(decodeUrl[decodeUrl.length-1] === '/'))
+		{
+				decodeUrl += "/";
+		}
+		console.log(decodeUrl);
+	const url = useState(decodeUrl+decodeChap)[0];
+	console.log(url);
+    const { server } = useContext(ServerContext);
 
-	const [author, date, content] = useState([]);
-	const [servers, setServers] = useState([]);
-	const { server, setServer} = useContext(ServerContext);
-	const [chapter, setChapter] = useState('');
-	const [chapters, setChapters] = useState([]);
+	const [Chapter, setChapter] = useState({});
+	
 	const colors = [
 		'black', 'white', 'lightgray', 'gray', 'red', 'green', 'blue', 'yellow',
 		'magenta', 'cyan', 'pink', 'purple', 'orange', 'brown', 'darkblue', 'darkgreen',
@@ -29,17 +36,7 @@ export const StoryDetail = ()=>{
 		'Arial', 'Helvetica', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Times New Roman', 
 		'Georgia', 'Garamond', 'Courier New', 'Brush Script MT', 'Comic Sans MS'
 	  ];
-	const handleChapterChange = ( e ) => {
-		const newChapter = e.target.value;
-        localStorage.setItem('chapter', newChapter);
-        setServer(newChapter);
-	};
 
-	const handleServerChange = ( e ) => {
-		const newServer = e.target.value;
-        localStorage.setItem('server', newServer);
-        setServer(newServer);
-	};
 
 
 
@@ -53,38 +50,33 @@ export const StoryDetail = ()=>{
 	const [backgroundColor, setBackgroundColor] = useState(() => localStorage.getItem('backgroundColor') || 'white');
 	const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || 'black');
 	const [lineHeight, setLineHeight] = useState(() => localStorage.getItem('lineHeight') || 1.5);
-	const [text, setText] = useState('This is a sample text to demonstrate the story reader customization.');
-
-	useEffect(() => {
-		const setupServer = async () => {
-			const data = await ServerService.getServers();
-			setServers(data);
-			const storedServer = localStorage.getItem('server');
-			if(!storedServer || !data.includes(storedServer)){
-				localStorage.setItem('server',data[0])
-				setServer(data[0])
-			}
-			else {
-				setServer(storedServer);
-			}
+	let title = useState('');
+	
+	// Hàm xử lý thay đổi Chapter
+	const handleChapterChange = (e) => {
+		let temp = e.target.value;
+		if (temp.endsWith('/')) {
+			temp = temp.slice(0, -1);
 		}
-		setupServer();
+		temp = temp.substring(temp.lastIndexOf('/') + 1);
+		const encodeChap = btoa(temp);
+		navigate(`/story/${encodedUrl}/${encodeChap}`);
+		location.reload();		
+	}
 
+	
 
-		const setupChapter = async () => {
-			const data = await ChapterService.getChapters();
-			setChapters(data);
-			const storedChapter = localStorage.getItem('server');
-			if(!storedChapter || !data.includes(storedChapter)){
-				localStorage.setItem('server',data[0])
-				setChapter(data[0])
-			}
-			else {
-				setChapter(storedChapter);
-			}
-		}
-		setupChapter();
+	useEffect(() => {		
 
+		
+		const getChapter = async () => {
+			const data = await StoryDetailService.getChapter(url);
+			if (data) setChapter(data);
+		};
+
+		getChapter();
+
+		
 		localStorage.setItem('fontSize', fontSize);
 		localStorage.setItem('fontFamily', fontFamily);
 		localStorage.setItem('backgroundColor', backgroundColor);
@@ -92,8 +84,70 @@ export const StoryDetail = ()=>{
 		localStorage.setItem('lineHeight', lineHeight);
 		localStorage.setItem('isHidden', JSON.stringify(isHidden));
 
-	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight, server, chapter])
+	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight, server])
 
+
+	const currentChapter = (Chapter.currentChapter != null) ? Chapter.currentChapter : false;
+	const chapters = (Chapter.chapters != null) ? Chapter.chapters : false;
+	if (Chapter.currentChapter != null)
+		{
+			title = Chapter.currentChapter.title ;
+		}
+	else if (chapters != null)
+		{
+			for (let i = 0; i < chapters.length; i++) {
+				if (chapters[i].url === Chapter.url)
+					title = chapters[i].title;
+			}
+		}
+	const breadcrumbItems = [
+		{ name: `${Chapter.title}`, link: `/story/${encodedUrl}` },
+		{ name: `${title}`},
+	];
+
+	
+	let index = 0;
+	if (Chapter.currentChapter != null)
+		{
+			index = Chapter.currentChapter.chapterNumber - 1;
+		}
+
+
+		function handleChangePrevious()
+		{
+			if (Chapter.currentChapter != null)
+				{
+					if (Chapter.currentChapter.chapterNumber > 1 && chapters)
+						{
+							let temp = chapters[Chapter.currentChapter.chapterNumber - 2].url;
+							if (temp.endsWith('/')) {
+								temp = temp.slice(0, -1);
+							}
+							temp = temp.substring(temp.lastIndexOf('/') + 1);
+							const encodeChap = btoa(temp);
+							navigate(`/story/${encodedUrl}/${encodeChap}`);
+							location.reload();
+						}
+				}
+		}
+		
+		function handleChangeNext()
+		{
+			if (Chapter.currentChapter != null)
+				{
+					if ( chapters && Chapter.currentChapter.chapterNumber < chapters.length + 1)
+						{
+							let temp = chapters[Chapter.currentChapter.chapterNumber].url;
+							if (temp.endsWith('/')) {
+								temp = temp.slice(0, -1);
+							}
+							temp = temp.substring(temp.lastIndexOf('/') + 1);
+							const encodeChap = btoa(temp);
+							navigate(`/story/${encodedUrl}/${encodeChap}`);
+							location.reload();
+						}
+				}
+		}
 
 	const handleFontSizeChange = (event) => {
 		setFontSize(event.target.value);
@@ -122,82 +176,77 @@ export const StoryDetail = ()=>{
 
 
 	return (
+		
 		<div 
 			className='mx-auto w-[1000px] mt-[20px]'
 		>
+			
 			<Breadcrumb items={breadcrumbItems} />
 			
 			<div
 			className='w-full rounded-none  p-5' style={{backgroundColor}}
 			>
-				<div className='border-dotted border-2 border-black w-full rounded-lg p-2  h-full'
-				>
-					<Typography
-						className='text-[red] text-3xl font-semibold  text-center m-1'
-					>
-						{name}
+				
+				<div className="border-dotted border-2 border-black w-full rounded-lg p-2  h-full">
+					<Typography className="text-[red] text-3xl font-semibold  text-center m-1">
+						<span>{Chapter.title}</span>
 					</Typography>
-					<Typography
-						className='text-1xl font-semibold  text-center m-1'
-					>
-						{chap}
+					{ currentChapter && (
+						<Typography className="text-1xl font-semibold  text-center m-1" style={{ color: fontColor }}>
+							<span>{title}</span>
+						</Typography>
+					)}
+					
+					<Typography className="text-1xl  text-center m-1" style={{ color: fontColor }}>
+						<span>{Chapter.author}</span>
 					</Typography>
-					<Typography
-						className='text-1xl  text-center m-1'
-					>
-						{author}
-					</Typography>
-					<Typography
-						className='text-1xl  text-center m-1'
-					>
-						{date}
-					</Typography>
+					<Typography className="text-1xl  text-center m-1" style={{ color: fontColor }}>
+						<span>{Chapter.updatedDate ? new Date(Chapter.updatedDate).toLocaleString() : 'null'}</span>
+					</Typography> 
 				</div>
+			
+
+				
 				<div className='w-full flex justify-center mt-5'>
 					<div
 						className="w-[70px] h-[30px] rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
+						onClick={handleChangePrevious}
 					>
 						&#60; Trước
 					</div>
 
-					<div className="w-[120px]  text-black m-1">
+					{ chapters && (
+
+						<div className="w-[250px]  text-black m-1">
 						<select 
 							className="w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black]"
 							onChange={handleChapterChange}
-							value={chapter}
+							
 						>
 							{
-								chapters.map((s, i) => (
-									<option
-										key={i}
-										value={s}
-									>
-										{s}
-									</option>
-								))
+								chapters.map((chap, i) => {
+									if (i === index)
+										{
+											return (
+												<option className=' text-center' selected key={i} value={chap.url}>{chap.title}</option>
+											)
+										}
+									else
+									{
+										return (
+											<option className=' text-center' key={i} value={chap.url}>{chap.title}</option>
+										)
+									}
+									
+								})
 							}
 						</select>
-					</div>
+						</div>
+					)} 
+					
 
 
-					<div className="w-[120px]  text-black m-1">
-						<select 
-							className="w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black]"
-							onChange={handleServerChange}
-							value={server}
-						>
-							{
-								servers.map((s, i) => (
-									<option
-										key={i}
-										value={s}
-									>
-										{s}
-									</option>
-								))
-							}
-						</select>
-					</div>
+					
 
 					<div
 						className="w-[40px] h-[30px]  rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
@@ -208,6 +257,7 @@ export const StoryDetail = ()=>{
 
 					<div
 						className="w-[70px] h-[30px] rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
+						onClick={handleChangeNext}
 					>
 						Sau &#62;
 					</div>
@@ -277,14 +327,17 @@ export const StoryDetail = ()=>{
 								</div>
 				)}
 
-
-				<div className="preview mt-5 p-2" style={{ fontSize: `${fontSize}px`, fontFamily,  color: fontColor, lineHeight }}>
-					{text}
-				</div>	
+			
+				<div className="preview mt-5 p-2" style={{ fontSize: `${fontSize}px`, fontFamily,  color: fontColor, lineHeight }}
+				dangerouslySetInnerHTML={{ __html: Chapter.content }}
+				>
+					
+				</div>
+			
 			</div>
 			
-				
 			
 		</div>
+	
 	)
 }
