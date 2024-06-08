@@ -4,16 +4,15 @@ import {useState,useEffect, useContext} from "react";
 import {Cog8ToothIcon} from "@heroicons/react/24/outline";
 import { ServerContext } from '../../context/ServerContext';
 import { ServerService } from "../../utils/ServerService";
-import { StoryDetailService } from '../../utils';
+import { StoryDetailService, BookService } from '../../utils';
 import {
     Typography,
     } from "@material-tailwind/react";
 
 export const StoryDetail = ()=>{
 
-
-	const [servers, setServers] = useState([]);
-	const {server, setServer} = useContext(ServerContext);
+	const [check, setcheck] = useState('T');
+	const {server} = useContext(ServerContext);
 	const navigate = useNavigate();
 	const { encodedUrl, chap } = useParams();
     let decodeUrl = atob(encodedUrl);
@@ -23,7 +22,6 @@ export const StoryDetail = ()=>{
 		{
 				decodeUrl += "/";
 		}
-		console.log(decodeUrl);
 	const url = useState(decodeUrl+decodeChap)[0];
 	
 
@@ -72,20 +70,20 @@ export const StoryDetail = ()=>{
 
 	useEffect(() => {		
 
-		const setupServer = async () => {
-			const data = await ServerService.getServers();
-			setServers(data);
-			const storedServer = localStorage.getItem('server');
-			if(!storedServer || !data.includes(storedServer)){
-				localStorage.setItem('server',data[0])
-				setServer(data[0])
-			}
-			else {
-				setServer(storedServer);
+		const getUrlNewServer = async () => {
+			if (Chapter && Object.keys(Chapter).length > 0) {
+				const data = await BookService.searchByName(Chapter.title);
+				if (data) {
+					window.location.href = `/story/${btoa(data[0].url)}`;
+				}
+				else {
+					setcheck('F');
+				}
 			}
 		}
-		setupServer();
 
+		getUrlNewServer()
+		
 		const getChapter = async () => {
 			const data = await StoryDetailService.getChapter(url);
 			if (data) setChapter(data);
@@ -101,9 +99,12 @@ export const StoryDetail = ()=>{
 		localStorage.setItem('lineHeight', lineHeight);
 		localStorage.setItem('isHidden', JSON.stringify(isHidden));
 
-	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight])
+	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight, server])
 
 
+	if (Chapter && Object.keys(Chapter).length > 0) {
+		console.log(Chapter);
+	}
 	const currentChapter = (Chapter.currentChapter != null) ? Chapter.currentChapter : false;
 	const chapters = (Chapter.chapters != null) ? Chapter.chapters : false;
 	if (Chapter.currentChapter != null)
@@ -166,12 +167,6 @@ export const StoryDetail = ()=>{
 			}
 		}
 
-	const handleServerChange = ( e ) => {
-		const newServer = e.target.value;
-		localStorage.setItem('server', newServer);
-		setServer(newServer);
-		location.reload();
-	};
 
 	const handleFontSizeChange = (event) => {
 		setFontSize(event.target.value);
@@ -204,185 +199,170 @@ export const StoryDetail = ()=>{
 		<div 
 			className='mx-auto w-[1000px] mt-[20px]'
 		>
-			
 			<Breadcrumb items={breadcrumbItems} />
+			{ check == 'F' ? (
+				<div className=" font-bold text-center col-span-9 p-4  flex flex-col" >
+					Không tồn tại truyện tại server này !
+				</div> )
 			
-			<div
-			className='w-full rounded-none  p-5' style={{backgroundColor}}
-			>
-				
-				<div className="border-dotted border-2 border-black w-full rounded-lg p-2  h-full">
-					<Typography className="text-[red] text-3xl font-semibold  text-center m-1">
-						<span>{Chapter.title}</span>
-					</Typography>
-					{ currentChapter && (
-						<Typography className="text-1xl font-semibold  text-center m-1" style={{ color: fontColor }}>
-							<span>{title}</span>
-						</Typography>
-					)}
-					
-					<Typography className="text-1xl  text-center m-1" style={{ color: fontColor }}>
-						<span>{Chapter.author}</span>
-					</Typography>
-					<Typography className="text-1xl  text-center m-1" style={{ color: fontColor }}>
-						<span>{Chapter.date ? new Date(Chapter.date).toLocaleString() : ''}</span>
-					</Typography> 
-				</div>
-			
-
-				
-				<div className='w-full flex justify-center mt-5'>
-					<div
-						className="w-[70px] h-[30px] rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
-						onClick={handleChangePrevious}
-					>
-						&#60; Trước
-					</div>
-
-					{ chapters && (
-
-						<div className="w-[200px]  text-black m-1">
-						<select 
-							className="w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black]"
-							onChange={handleChapterChange}
-							
-						>
-							{
-								chapters.map((chap, i) => {
-									if (i === index)
-										{
-											return (
-												<option className=' text-center' selected key={i} value={chap.url}>{chap.title}</option>
-											)
-										}
-									else
-									{
-										return (
-											<option className=' text-center' key={i} value={chap.url}>{chap.title}</option>
-										)
-									}
-									
-								})
-							}
-						</select>
-						
-						</div>
-					)} 
-
-						<div className="w-[100px]  text-black m-1">
-						<select 
-							className="w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black]"
-							onChange={handleServerChange}
-							value={server}
-						>
-							{
-								servers.map((s, i) => (
-									<option
-										key={i}
-										value={s}
-									>
-										{s}
-									</option>
-								))
-							}
-							
-						</select>
-						
-						</div>
-					
-
-
-					
-
-					<div
-						className="w-[40px] h-[30px]  rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
-							onClick={handleShowConfigDisplay}
-					>
-						<Cog8ToothIcon className=' w-6 h-6'/>
-					</div>
-
-					<div
-						className="w-[70px] h-[30px] rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
-						onClick={handleChangeNext}
-					>
-						Sau &#62;
-					</div>
-
-				</div>
-				{!isHidden && (
-									<div
-									className=' w-full flex justify-center mt-5 ' style={{color: fontColor, fontFamily}} 
-								>
-									<div
-										className=' w-6/12 rounded-none border-dotted border border-[black] '
-									>
-										<div className='border-b border-dotted  border-[black] pt-3 pb-1 p-2 '>
-											<label className='flex justify-between'>
-											Kích cỡ chữ:
-											<select value={fontSize} onChange={handleFontSizeChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
-												{[8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60].map(size => (
-												<option key={size} value={size}>{size}</option>
-												))}
-											</select>
-											</label>
-										</div>
-										<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 '>
-											<label className='flex justify-between'>
-											Kiểu chữ: 
-											<select value={fontFamily} onChange={handleFontFamilyChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
-												{fontFamilies.map(font => (
-												<option key={font} value={font}>{font}</option>
-												))}
-											</select>
-											</label>
-										</div>
-										<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 '>
-											<label className='flex justify-between'>
-											Màu nền: 
-											<select value={backgroundColor} onChange={handleBackgroundColorChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
-												{colors.map(color => (
-												<option key={color} value={color} style={{ backgroundColor: color }}>{color}</option>
-												))}
-											</select>
-											</label>
-										</div>
-										<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 '>
-											<label className='flex justify-between'>
-											Màu chữ:
-											<select value={fontColor} onChange={handleFontColorChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
-												{colors.map(color => (
-												<option key={color} value={color} style={{ color: color }}>{color}</option>
-												))}
-											</select>
-											</label>
-										</div>
-										<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 mb-2'>
-											<label className='flex justify-between'>
-											Chiều cao dòng: 
-											<select value={lineHeight} onChange={handleLineHeightChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
-												{[0.5, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 2.25, 4.5, 4.75, 5].map(height => (
-												<option key={height} value={height}>{height}</option>
-												))}
-											</select>
-											</label>
-										</div>
-										
-				
-									</div>
-									
-								</div>
-				)}
-
-			
-				<div className="preview mt-5 p-2" style={{ fontSize: `${fontSize}px`, fontFamily,  color: fontColor, lineHeight }}
-				dangerouslySetInnerHTML={{ __html: Chapter.content }}
+				: (Chapter && Object.keys(Chapter).length > 0 &&
+				<div
+				className='w-full rounded-none  p-5' style={{backgroundColor}}
 				>
 					
+					<div className="border-dotted border-2 border-black w-full rounded-lg p-2  h-full">
+						<Typography className="text-[red] text-3xl font-semibold  text-center m-1">
+							<span>{Chapter.title}</span>
+						</Typography>
+						{ currentChapter && (
+							<Typography className="text-1xl font-semibold  text-center m-1" style={{ color: fontColor }}>
+								<span>{title}</span>
+							</Typography>
+						)}
+						
+						<Typography className="text-1xl  text-center m-1" style={{ color: fontColor }}>
+							<span>{Chapter.author}</span>
+						</Typography>
+						<Typography className="text-1xl  text-center m-1" style={{ color: fontColor }}>
+							<span>{Chapter.date ? new Date(Chapter.date).toLocaleString() : ''}</span>
+						</Typography> 
+					</div>
+				
+	
+					
+					<div className='w-full flex justify-center mt-5'>
+						<div
+							className="w-[70px] h-[30px] rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
+							onClick={handleChangePrevious}
+						>
+							&#60; Trước
+						</div>
+	
+						{ chapters && (
+	
+							<div className="w-[200px]  text-black m-1">
+							<select 
+								className="w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black]"
+								onChange={handleChapterChange}
+								
+							>
+								{
+									chapters.map((chap, i) => {
+										if (i === index)
+											{
+												return (
+													<option className=' text-center' selected key={i} value={chap.url}>{chap.title}</option>
+												)
+											}
+										else
+										{
+											return (
+												<option className=' text-center' key={i} value={chap.url}>{chap.title}</option>
+											)
+										}
+										
+									})
+								}
+							</select>
+							
+							</div>
+						)} 
+	
+							
+	
+	
+						
+	
+						<div
+							className="w-[40px] h-[30px]  rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
+								onClick={handleShowConfigDisplay}
+						>
+							<Cog8ToothIcon className=' w-6 h-6'/>
+						</div>
+	
+						<div
+							className="w-[70px] h-[30px] rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
+							onClick={handleChangeNext}
+						>
+							Sau &#62;
+						</div>
+	
+					</div>
+					{!isHidden && (
+										<div
+										className=' w-full flex justify-center mt-5 ' style={{color: fontColor, fontFamily}} 
+									>
+										<div
+											className=' w-6/12 rounded-none border-dotted border border-[black] '
+										>
+											<div className='border-b border-dotted  border-[black] pt-3 pb-1 p-2 '>
+												<label className='flex justify-between'>
+												Kích cỡ chữ:
+												<select value={fontSize} onChange={handleFontSizeChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													{[8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60].map(size => (
+													<option key={size} value={size}>{size}</option>
+													))}
+												</select>
+												</label>
+											</div>
+											<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 '>
+												<label className='flex justify-between'>
+												Kiểu chữ: 
+												<select value={fontFamily} onChange={handleFontFamilyChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													{fontFamilies.map(font => (
+													<option key={font} value={font}>{font}</option>
+													))}
+												</select>
+												</label>
+											</div>
+											<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 '>
+												<label className='flex justify-between'>
+												Màu nền: 
+												<select value={backgroundColor} onChange={handleBackgroundColorChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													{colors.map(color => (
+													<option key={color} value={color} style={{ backgroundColor: color }}>{color}</option>
+													))}
+												</select>
+												</label>
+											</div>
+											<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 '>
+												<label className='flex justify-between'>
+												Màu chữ:
+												<select value={fontColor} onChange={handleFontColorChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													{colors.map(color => (
+													<option key={color} value={color} style={{ color: color }}>{color}</option>
+													))}
+												</select>
+												</label>
+											</div>
+											<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 mb-2'>
+												<label className='flex justify-between'>
+												Chiều cao dòng: 
+												<select value={lineHeight} onChange={handleLineHeightChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													{[0.5, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 2.25, 4.5, 4.75, 5].map(height => (
+													<option key={height} value={height}>{height}</option>
+													))}
+												</select>
+												</label>
+											</div>
+											
+					
+										</div>
+										
+									</div>
+					)}
+	
+				
+					<div className="preview mt-5 p-2" style={{ fontSize: `${fontSize}px`, fontFamily,  color: fontColor, lineHeight }}
+					dangerouslySetInnerHTML={{ __html: Chapter.content }}
+					>
+						
+					</div>
+				
 				</div>
-			
-			</div>
-			
-			
+				
+			)}
+					
 		</div>
 	
 	)
