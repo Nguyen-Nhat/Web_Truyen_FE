@@ -4,7 +4,7 @@ import {useState,useEffect, useContext} from "react";
 import {Cog8ToothIcon} from "@heroicons/react/24/outline";
 import { ServerContext } from '../../context/ServerContext';
 import { ServerService } from "../../utils/ServerService";
-import { StoryDetailService, BookService } from '../../utils';
+import { StoryDetailService, BookService, ExportService } from '../../utils';
 import {
     Typography,
     } from "@material-tailwind/react";
@@ -12,9 +12,10 @@ import {
 export const StoryDetail = ()=>{
 
 	const [check, setcheck] = useState('T');
-	const [servers, setServers] = useState([]);
+
+
 	const {server, setServer} = useContext(ServerContext);
-	
+	const [formats, setFormats] = useState([]);
 	const navigate = useNavigate();
 	const { encodedUrl, chap } = useParams();
     let decodeUrl = atob(encodedUrl);
@@ -48,6 +49,7 @@ export const StoryDetail = ()=>{
 		const savedState = localStorage.getItem('isHidden');
 		return savedState !== null ? JSON.parse(savedState) : false;
 	  });
+	const [format, setFormat] = useState(() => localStorage.getItem('format') || '');
 	const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || 16);
 	const [fontFamily, setFontFamily] = useState(() => localStorage.getItem('fontFamily') || 'Arial');
 	const [backgroundColor, setBackgroundColor] = useState(() => localStorage.getItem('backgroundColor') || 'white');
@@ -72,23 +74,8 @@ export const StoryDetail = ()=>{
 
 	useEffect(() => {		
 
-		// const getUrlNewServer = async () => {
-		// 	if (Chapter && Object.keys(Chapter).length > 0) {
-		// 		const data = await BookService.searchByName(Chapter.title);
-		// 		if (data) {
-		// 			window.location.href = `/story/${btoa(data[0].url)}`;
-		// 		}
-		// 		else {
-		// 			setcheck('F');
-		// 		}
-		// 	}
-		// }
-
-		//getUrlNewServer();
-
 		const setupServer = async () => {
 			const data = await ServerService.getServers();
-			setServers(data);
 			const storedServer = localStorage.getItem('server');
 		
 			if(!storedServer || !data.includes(storedServer)){
@@ -98,11 +85,18 @@ export const StoryDetail = ()=>{
 			else {
 				setServer(storedServer);
 				localStorage.setItem('server', data.index(storedServer));
+				const data = await BookService.searchByName(Chapter.title);
 			}
 			
 		}
 		setupServer();
+
+		const getFormats = async () => {
+			const data = await ExportService.getFormats();
+			if (data) setFormats(data);
+		}
 		
+		getFormats();
 		const getChapter = async () => {
 			const data = await StoryDetailService.getChapter(url);
 			if (data) {
@@ -115,7 +109,7 @@ export const StoryDetail = ()=>{
 
 		getChapter();
 
-		
+		localStorage.setItem('format', format);
 		localStorage.setItem('fontSize', fontSize);
 		localStorage.setItem('fontFamily', fontFamily);
 		localStorage.setItem('backgroundColor', backgroundColor);
@@ -123,7 +117,7 @@ export const StoryDetail = ()=>{
 		localStorage.setItem('lineHeight', lineHeight);
 		localStorage.setItem('isHidden', JSON.stringify(isHidden));
 
-	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight, server])
+	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight, server, format])
 
 
 	const currentChapter = (Chapter.currentChapter != null) ? Chapter.currentChapter : false;
@@ -188,6 +182,11 @@ export const StoryDetail = ()=>{
 			}
 		}
 
+		
+	const handleFormatChange = (event) => {
+		setFormat(event.target.value);
+		};
+	
 
 	const handleFontSizeChange = (event) => {
 		setFontSize(event.target.value);
@@ -214,6 +213,10 @@ export const StoryDetail = ()=>{
 		setLineHeight(event.target.value);
 	  };
 
+	  const handleExport = () => {
+		if (Chapter && Chapter.hasOwnProperty('content'))
+			ExportService.postExport(format, Chapter.content);
+	 };
 
 	return (
 		
@@ -366,6 +369,27 @@ export const StoryDetail = ()=>{
 												</select>
 												</label>
 											</div>
+											<div className=' pt-0 pb-1 p-2 mb-2'>
+												<label className='flex justify-between'>
+												Định dạng file: 
+												<select value={format} onChange={handleFormatChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													{formats.map(format => (
+													<option key={format} value={format}>{format}</option>
+													))}
+												</select>
+												</label>
+												
+											</div>
+
+											<div className='flex justify-center'>
+												<div 
+													className="w-[100px] h-[33px]  rounded bg-[#2779B0] text-center  text-[white] hover:bg-[#66b4e8] cursor-default mb-2 mt-0 m-1 p-1"
+													onClick={handleExport}
+												>
+													Xuất file
+												</div>
+											</div>
+											
 											
 					
 										</div>
