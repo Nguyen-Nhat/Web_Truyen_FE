@@ -12,7 +12,9 @@ import {
 export const StoryDetail = ()=>{
 
 	const [check, setcheck] = useState('T');
-	const {server} = useContext(ServerContext);
+	const [servers, setServers] = useState([]);
+	const {server, setServer} = useContext(ServerContext);
+	
 	const navigate = useNavigate();
 	const { encodedUrl, chap } = useParams();
     let decodeUrl = atob(encodedUrl);
@@ -70,23 +72,45 @@ export const StoryDetail = ()=>{
 
 	useEffect(() => {		
 
-		const getUrlNewServer = async () => {
-			if (Chapter && Object.keys(Chapter).length > 0) {
-				const data = await BookService.searchByName(Chapter.title);
-				if (data) {
-					window.location.href = `/story/${btoa(data[0].url)}`;
-				}
-				else {
-					setcheck('F');
-				}
-			}
-		}
+		// const getUrlNewServer = async () => {
+		// 	if (Chapter && Object.keys(Chapter).length > 0) {
+		// 		const data = await BookService.searchByName(Chapter.title);
+		// 		if (data) {
+		// 			window.location.href = `/story/${btoa(data[0].url)}`;
+		// 		}
+		// 		else {
+		// 			setcheck('F');
+		// 		}
+		// 	}
+		// }
 
-		getUrlNewServer()
+		//getUrlNewServer();
+
+		const setupServer = async () => {
+			const data = await ServerService.getServers();
+			setServers(data);
+			const storedServer = localStorage.getItem('server');
+		
+			if(!storedServer || !data.includes(storedServer)){
+				localStorage.setItem('server',data[0])
+				setServer(data[0])
+			}
+			else {
+				setServer(storedServer);
+				localStorage.setItem('server', data.index(storedServer));
+			}
+			
+		}
+		setupServer();
 		
 		const getChapter = async () => {
 			const data = await StoryDetailService.getChapter(url);
-			if (data) setChapter(data);
+			if (data) {
+				setcheck('T');
+				setChapter(data);
+			}
+			else
+				setcheck('F');
 		};
 
 		getChapter();
@@ -102,9 +126,6 @@ export const StoryDetail = ()=>{
 	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight, server])
 
 
-	if (Chapter && Object.keys(Chapter).length > 0) {
-		console.log(Chapter);
-	}
 	const currentChapter = (Chapter.currentChapter != null) ? Chapter.currentChapter : false;
 	const chapters = (Chapter.chapters != null) ? Chapter.chapters : false;
 	if (Chapter.currentChapter != null)
@@ -200,12 +221,12 @@ export const StoryDetail = ()=>{
 			className='mx-auto w-[1000px] mt-[20px]'
 		>
 			<Breadcrumb items={breadcrumbItems} />
-			{ check == 'F' ? (
+			{ check == 'F'  ? (
 				<div className=" font-bold text-center col-span-9 p-4  flex flex-col" >
 					Không tồn tại truyện tại server này !
 				</div> )
 			
-				: (Chapter && Object.keys(Chapter).length > 0 &&
+				: Chapter && Object.keys(Chapter).length > 0 && (
 				<div
 				className='w-full rounded-none  p-5' style={{backgroundColor}}
 				>
