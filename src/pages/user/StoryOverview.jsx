@@ -28,18 +28,9 @@ export const StoryOverview = () => {
 	const [booksReconmend, setBooks] = useState([]);
 	const [chapterInforByPage1, setChapterInfor1] = useState([]);
 
+
+
 	useEffect(() => {
-		const getUrlNewServer = async () => {
-			if (overviewService && Object.keys(overviewService).length > 0) {
-				const data = await BookService.searchByName(overviewService.title);
-				if (data) {
-					window.location.href = `/story/${btoa(data[0].url)}`;
-				}
-				else {
-					setcheck('F');
-				}
-			}
-		}
 		const getRecommendation = async () => {
 			const data = await BookService.getRecommendation();
 			if (data) setBooks(data);
@@ -56,16 +47,29 @@ export const StoryOverview = () => {
 			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
 			if (data) setChapterInfor1(data);
 		}
-		getUrlNewServer();
-		if (check) {
-			getRecommendation();
-			getOverviewParams()
-			getChapterInfor();
-			getChapterInfor1();
+		getRecommendation();
+		getOverviewParams()
+		getChapterInfor();
+		getChapterInfor1();
+
+	}, []);
+
+	useEffect(() => {
+		const getUrlNewServer = async () => {
+			if (overviewService && Object.keys(overviewService).length > 0) {
+				const title = chuyenDoiKhongDau(overviewService.title.includes(' - ') ? overviewService.title.split(' - ')[0] : overviewService.title);
+				const data = await BookService.searchByName(title, 1);
+				if (data && data.length > 0) {
+					window.location.href = `/story/${btoa(data[0].url)}`;
+				}
+				else {
+					setcheck('F');
+				}
+			}
 		}
+		getUrlNewServer();
 
 	}, [server]);
-
 	useEffect(() => {
 		const getChapterInfor = async () => {
 			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
@@ -205,7 +209,7 @@ export const StoryOverview = () => {
 										return (
 											<div key={i} className="items-center pt-2 pb-2 border-t border-gray-500 flex flex-row" >
 												<img src={book.coverImage}
-													alt="Image" className='w-[80px] h-[80px]' />
+													alt="Image" className='w-20 h-20 flex-shrink-0' />
 												<div className="flex flex-col ml-2">
 													<Link to={`/story/${newEncodedUrl}`} className="hover:underline">
 														<Typography className='text-sm' onClick={() => window.location.href = `/story/${newEncodedUrl}`}>
