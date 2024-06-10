@@ -1,13 +1,12 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom"
 import { IconButton, Typography } from "@material-tailwind/react";
 import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 export function Pagination({ pageLimit = 10 }) {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const [pageOffset, setPageOffset] = React.useState(() => {
+	const [pageOffset, setPageOffset] = useState(() => {
 		return +searchParams.get("page") || 1;
-
 	});
 
 	const next = () => {

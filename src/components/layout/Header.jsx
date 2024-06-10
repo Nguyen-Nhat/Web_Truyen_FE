@@ -29,9 +29,9 @@ export function Header(){
 		setupServer();
 	},[])
 	
-	const handleSearch = ( e ) => {
+	const handleSearch = () => {
 		if (searchString.trim() !== '') {
-			navigate(`/search?q=${searchString}`);
+			navigate(`/search?q=${searchString}&page=1`);
 			setSearchString('');
 		}
 	};

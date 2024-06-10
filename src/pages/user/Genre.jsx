@@ -3,11 +3,13 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { GenreService, BookService } from '../../utils'
 import { Breadcrumb, GenreList,  BookList } from '../../components';
 import { ServerContext } from '../../context/ServerContext';
+import { Spinner } from '@material-tailwind/react';
 export const Genre = ()=>{
 	const {slug} = useParams();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [books, setBooks] = useState([]);
 	const [genres, setGenres] = useState([]);
+	const [isLoading, setIsLoading] = useState(false);
 	const { server } = useContext(ServerContext);
 	
 	const breadcrumbItems = [
@@ -28,16 +30,24 @@ export const Genre = ()=>{
 			if(data) setGenres(data);
 		}
 
-		getSearchResult()
-		getGenres();
+		setIsLoading(true);
+		Promise.all([getSearchResult(), getGenres()]).then(() => setIsLoading(false));
 	},[slug,searchParams, server]); 
 	return (
 		<div className='mx-auto max-w-[1000px] mt-[20px]'>
 			<Breadcrumb items={breadcrumbItems} />
-			<div className='flex  mt-[10px]'>
-				<BookList title={`Truyện cùng chủ đề`} books={books} />
-				<GenreList genres={genres} />
-			</div>
+			{
+				isLoading ? (
+					<div className="flex items-center justify-center h-screen">
+						<Spinner />
+					</div>
+				) : (
+					<div className='flex  mt-[10px]'>
+						<BookList title={`Truyện cùng chủ đề`} books={books} />
+						<GenreList genres={genres} />
+					</div>
+				)
+			}
 		</div>
 	)
 }

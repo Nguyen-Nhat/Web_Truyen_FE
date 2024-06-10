@@ -33,4 +33,4 @@ export function Breadcrumb({ items }){
 			))}
 		</div>
 	);
-};  
+}

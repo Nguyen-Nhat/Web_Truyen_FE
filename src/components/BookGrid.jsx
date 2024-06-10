@@ -26,7 +26,9 @@ export function BookGrid({title, books}){
 							<Link to={`/story/${encodedUrl}`}>
 								<Typography className='mt-2 text-center hover:underline'>{book.title}</Typography>
 							</Link>
-							<Typography className='mt-1 text-sm text-gray-500'>{book.author}</Typography>
+							<Link to={`/author/${btoa(book.author.url)}?page=1`}>
+								<Typography className='mt-1 text-sm text-gray-500 hover:underline'>{book.author.name}</Typography>
+							</Link>
 						</div>
 					)
 				})}
