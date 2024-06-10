@@ -11,9 +11,12 @@ import {
 
 export const StoryDetail = ()=>{
 
+	const [historyReader, setHistoryReader] = useState(() => {
+		const storedHistory = localStorage.getItem('historyReader');
+		return storedHistory ? JSON.parse(storedHistory) : [];
+	});
 	const [check, setcheck] = useState('T');
-
-
+	const [isSaveHistory, setSaveHistory] = useState('T');
 	const {server, setServer} = useContext(ServerContext);
 	const [formats, setFormats] = useState([]);
 	const navigate = useNavigate();
@@ -42,13 +45,13 @@ export const StoryDetail = ()=>{
 	  ];
 
 
-
-
 	
 	const [isHidden, setIsHidden] = useState(() => {
 		const savedState = localStorage.getItem('isHidden');
 		return savedState !== null ? JSON.parse(savedState) : false;
 	  });
+
+
 	const [format, setFormat] = useState(() => localStorage.getItem('format') || '');
 	const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || 16);
 	const [fontFamily, setFontFamily] = useState(() => localStorage.getItem('fontFamily') || 'Arial');
@@ -74,6 +77,19 @@ export const StoryDetail = ()=>{
 
 	useEffect(() => {		
 
+
+		if (historyReader) {
+		try {
+			historyReader = JSON.parse(historyReader);
+			} catch (e) {
+			console.error('Error parsing jsonArrayFromStorage', e);
+			}
+		}
+		else{
+			historyReader=[];
+		}
+		
+		
 		const setupServer = async () => {
 			const data = await ServerService.getServers();
 			const storedServer = localStorage.getItem('server');
@@ -95,8 +111,8 @@ export const StoryDetail = ()=>{
 			const data = await ExportService.getFormats();
 			if (data) setFormats(data);
 		}
-		
 		getFormats();
+		
 		const getChapter = async () => {
 			const data = await StoryDetailService.getChapter(url);
 			if (data) {
@@ -106,9 +122,19 @@ export const StoryDetail = ()=>{
 			else
 				setcheck('F');
 		};
-
 		getChapter();
 
+		if (Chapter != null && Chapter.title != null && isSaveHistory == 'T') {
+			let updatedHistory = [];
+			if (Array.isArray(historyReader)) {
+				updatedHistory = historyReader.filter(item => item.title !== Chapter.title);
+			}
+			updatedHistory = [...updatedHistory,{ title: Chapter.title, url: url, server: server }];
+			setHistoryReader(updatedHistory);
+			console.log(updatedHistory);
+			setSaveHistory('F');
+			localStorage.setItem('historyReader', JSON.stringify(updatedHistory));
+		}
 		localStorage.setItem('format', format);
 		localStorage.setItem('fontSize', fontSize);
 		localStorage.setItem('fontFamily', fontFamily);
@@ -116,8 +142,7 @@ export const StoryDetail = ()=>{
 		localStorage.setItem('fontColor', fontColor);
 		localStorage.setItem('lineHeight', lineHeight);
 		localStorage.setItem('isHidden', JSON.stringify(isHidden));
-
-	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight, server, format])
+	},[ isHidden,fontSize, fontFamily, backgroundColor, fontColor, lineHeight, server, format, historyReader, isSaveHistory, Chapter]);
 
 
 	const currentChapter = (Chapter.currentChapter != null) ? Chapter.currentChapter : false;
@@ -138,6 +163,7 @@ export const StoryDetail = ()=>{
 		{ name: `${title}`},
 	];
 
+
 	
 	let index = 0;
 	if (Chapter.currentChapter != null)
@@ -146,41 +172,41 @@ export const StoryDetail = ()=>{
 	}
 
 
-		function handleChangePrevious()
-		{
-			if (Chapter.currentChapter != null)
-				{
-					if (Chapter.currentChapter.chapterNumber > 1 && chapters)
-						{
-							let temp = chapters[Chapter.currentChapter.chapterNumber - 2].url;
-							if (temp.endsWith('/')) {
-								temp = temp.slice(0, -1);
-							}
-							temp = temp.substring(temp.lastIndexOf('/') + 1);
-							const encodeChap = btoa(temp);
-							navigate(`/story/${encodedUrl}/${encodeChap}`);
-							location.reload();
-						}
-				}
-		}
-		
-		function handleChangeNext()
-		{
-			if (Chapter.currentChapter != null)
+	function handleChangePrevious()
+	{
+		if (Chapter.currentChapter != null)
 			{
-				if ( chapters && Chapter.currentChapter.chapterNumber < chapters.length + 1)
-				{
-					let temp = chapters[Chapter.currentChapter.chapterNumber].url;
-					if (temp.endsWith('/')) {
-						temp = temp.slice(0, -1);
+				if (Chapter.currentChapter.chapterNumber > 1 && chapters)
+					{
+						let temp = chapters[Chapter.currentChapter.chapterNumber - 2].url;
+						if (temp.endsWith('/')) {
+							temp = temp.slice(0, -1);
+						}
+						temp = temp.substring(temp.lastIndexOf('/') + 1);
+						const encodeChap = btoa(temp);
+						navigate(`/story/${encodedUrl}/${encodeChap}`);
+						location.reload();
 					}
-					temp = temp.substring(temp.lastIndexOf('/') + 1);
-					const encodeChap = btoa(temp);
-					navigate(`/story/${encodedUrl}/${encodeChap}`);
-					location.reload();
+			}
+	}
+		
+	function handleChangeNext()
+	{
+		if (Chapter.currentChapter != null)
+		{
+			if ( chapters && Chapter.currentChapter.chapterNumber < chapters.length + 1)
+			{
+				let temp = chapters[Chapter.currentChapter.chapterNumber].url;
+				if (temp.endsWith('/')) {
+					temp = temp.slice(0, -1);
 				}
+				temp = temp.substring(temp.lastIndexOf('/') + 1);
+				const encodeChap = btoa(temp);
+				navigate(`/story/${encodedUrl}/${encodeChap}`);
+				location.reload();
 			}
 		}
+	}
 
 		
 	const handleFormatChange = (event) => {
