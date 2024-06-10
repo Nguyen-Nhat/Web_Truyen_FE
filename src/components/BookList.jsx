@@ -19,38 +19,44 @@ export function BookList({title, books}) {
 				</Typography>
 			</div>
 			{
-				books.map((book , i) => {
-					const lastUpdatedDate = new Date(book.lastDayUpdate);
-					const currentDate = new Date();
-					const differenceInTime = currentDate.getTime() - lastUpdatedDate.getTime();
-					const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
+				books === null ? (
+					<Typography className='text-black text-center'>Lỗi kết nối</Typography>
+				) : books.length === 0 ? (
+					<Typography className='text-black text-center'>Không tìm thấy</Typography>
+				) : (
+					books.map((book , i) => {
+						const lastUpdatedDate = new Date(book.lastDayUpdate);
+						const currentDate = new Date();
+						const differenceInTime = currentDate.getTime() - lastUpdatedDate.getTime();
+						const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
 
-					const encodedUrl = btoa(book.url);
-					return (
-						<div className='flex items-center h-[74px] border-b my-1' key={i}>
-							<img src={book.coverImage} alt={book.title} className='w-[74px] h-[74px]' />
-							<div className='ml-4'>
-								<Link to={`/story/${encodedUrl}`} className='hover:underline'>
-									<Typography className='text-base'>{book.title}</Typography>
-								</Link>
-								<div className='flex items-center'>
-									<UserIcon className='h-5 w-5 p-1'/>
-									<Typography className='text-base text-gray-500'>{book.author}</Typography>
+						const encodedUrl = btoa(book.url);
+						return (
+							<div className='flex items-center h-[74px] border-b my-1' key={i}>
+								<img src={book.coverImage} alt={book.title} className='w-[74px] h-[74px]' />
+								<div className='ml-4'>
+									<Link to={`/story/${encodedUrl}`} className='hover:underline'>
+										<Typography className='text-base'>{book.title}</Typography>
+									</Link>
+									<Link to={`/author/${btoa(book.author.url)}?page=1`} className='flex items-center hover:underline'>
+										<UserIcon className='h-5 w-5 p-1'/>
+										<Typography className='text-base text-gray-500'>{book.author.name}</Typography>
+									</Link>
+								</div>
+								<div className='ml-auto w-[150px]'>
+									<Typography className='text-base'>{book.lastChapter}</Typography>
+									<Typography className='text-sm text-gray-500'>
+										{differenceInDays} ngày trước
+									</Typography>
 								</div>
 							</div>
-							<div className='ml-auto w-[150px]'>
-								<Typography className='text-base'>{book.lastChapter}</Typography>
-								<Typography className='text-sm text-gray-500'>
-									{differenceInDays} ngày trước
-								</Typography>
-							</div>
-						</div>
-					)
-				})
+						)
+					})
+				)
 			}
 			
             <CardFooter className='mx-auto -mt-4'>
-				<Pagination pageLimit={1000} />
+				<Pagination pageLimit={books[0]?.maxPage || 1} />
 			</CardFooter>
 		</div>
 	);

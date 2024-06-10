@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate,BrowserRouter } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { User } from "./layouts";
 function App() {
 	return (
@@ -8,5 +8,5 @@ function App() {
 			</Routes>
 		</>
 	)
-};
+}
 export default App;

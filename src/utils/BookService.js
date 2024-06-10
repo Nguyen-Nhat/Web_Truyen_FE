@@ -23,6 +23,17 @@ export const BookService = {
 		const data = await res.json();
         return data.data;
 	},
+	getByAuthor: async (url, page) => {
+		const server = localStorage.getItem('server');
+		const res = await fetch(`${ API_URL }/${server}/author?url=${url}&page=${page}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+            },
+		});
+		const data = await res.json();
+        return data.data;
+	},
 	getRecommendation: async () => {
 		const server = localStorage.getItem('server');
 		const res = await fetch(`${ API_URL }/${server}/recommendation`, {
