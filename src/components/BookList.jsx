@@ -38,10 +38,21 @@ export function BookList({title, books}) {
 									<Link to={`/story/${encodedUrl}`} className='hover:underline'>
 										<Typography className='text-base'>{book.title}</Typography>
 									</Link>
-									<Link to={`/author/${btoa(encodeURIComponent(book.author.url))}?page=1`} className='flex items-center hover:underline'>
-										<UserIcon className='h-5 w-5 p-1'/>
-										<Typography className='text-base text-gray-500'>{book.author.name}</Typography>
-									</Link>
+									{
+										book.author ? (
+											book.author.url ? (
+												<Link to={`/author/${btoa(encodeURIComponent(book.author.url))}?page=1`} className='flex items-center hover:underline'>
+													<UserIcon className='h-5 w-5 p-1'/>
+													<Typography className='text-base text-gray-500'>{book.author.name}</Typography>
+												</Link>
+											) : (
+												<div className='flex items-center'>
+													<UserIcon className='h-5 w-5 p-1'/>
+													<Typography className='text-base text-gray-500'>{book.author.name}</Typography>
+												</div>
+											)
+										) : null
+									}
 								</div>
 								<div className='ml-auto w-[150px]'>
 									<Typography className='text-base'>{book.lastChapter}</Typography>

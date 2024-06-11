@@ -26,9 +26,19 @@ export function BookGrid({title, books}){
 							<Link to={`/story/${encodedUrl}`}>
 								<Typography className='mt-2 text-center hover:underline'>{book.title}</Typography>
 							</Link>
-							<Link to={`/author/${btoa(encodeURIComponent(book.author.url))}?page=1`}>
-								<Typography className='mt-1 text-sm text-gray-500 hover:underline'>{book.author.name}</Typography>
-							</Link>
+							{
+								book.author? (
+									book.author.url ? (
+										<Link to={`/author/${btoa(encodeURIComponent(book.author.url))}?page=1`}>
+											<Typography className='mt-1 text-sm text-gray-500 hover:underline'>{book.author.name}</Typography>
+										</Link>
+									) : (
+										<div>
+											<Typography className='mt-1 text-sm text-gray-500'>{book.author.name}</Typography>
+										</div>
+									)
+								) : null
+							}
 						</div>
 					)
 				})}
