@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
-import {Pagination} from './Pagination'
-import { UserIcon } from "@heroicons/react/24/solid"
+import {Pagination} from './Pagination';
+import { UserIcon } from '@heroicons/react/24/solid';
 import {
 	Typography,
 	CardFooter,
-} from "@material-tailwind/react"
+} from '@material-tailwind/react';
 
 export function BookList({title, books}) {
 	return (
@@ -24,7 +24,7 @@ export function BookList({title, books}) {
 				) : books.length === 0 ? (
 					<Typography className='text-black text-center'>Không tìm thấy</Typography>
 				) : (
-					books.map((book , i) => {
+					books.map((book, i) => {
 						const lastUpdatedDate = new Date(book.lastDayUpdate);
 						const currentDate = new Date();
 						const differenceInTime = currentDate.getTime() - lastUpdatedDate.getTime();
@@ -61,12 +61,12 @@ export function BookList({title, books}) {
 									</Typography>
 								</div>
 							</div>
-						)
+						);
 					})
 				)
 			}
-			
-            <CardFooter className='mx-auto -mt-4'>
+
+			<CardFooter className='mx-auto -mt-4'>
 				<Pagination pageLimit={books[0]?.maxPage || 1} />
 			</CardFooter>
 		</div>

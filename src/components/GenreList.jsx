@@ -2,12 +2,12 @@ import { Link } from 'react-router-dom';
 import { Typography } from '@material-tailwind/react';
 import { TagIcon } from '@heroicons/react/24/solid';
 
-export function GenreList({ genres }){
+export function GenreList({ genres }) {
 	return (
 		<div className='w-[300px] h-fit ml-[20px] bg-white'>
 			<div className='w-full border px-[10px] py-[8px]'>
 				<Typography className='text-[#2f52b2] text-lg font-semibold'>
-					THỂ LOẠI TRUYỆN 
+					THỂ LOẠI TRUYỆN
 				</Typography>
 			</div>
 			<div className='grid grid-cols-2 gap-2'>

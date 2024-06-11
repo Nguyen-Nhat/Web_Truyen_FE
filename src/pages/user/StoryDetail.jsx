@@ -1,14 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Breadcrumb } from '../../components';
-import { useState, useEffect, useContext } from "react";
-import { Cog8ToothIcon } from "@heroicons/react/24/outline";
+import { useState, useEffect, useContext } from 'react';
+import { Cog8ToothIcon } from '@heroicons/react/24/outline';
 import { ServerContext } from '../../context/ServerContext';
-import { ServerService } from "../../utils/ServerService";
 import { StoryDetailService, BookService, ExportService } from '../../utils';
 import { Spinner } from '@material-tailwind/react';
 import {
 	Typography,
-} from "@material-tailwind/react";
+} from '@material-tailwind/react';
 
 export const StoryDetail = () => {
 
@@ -19,7 +18,7 @@ export const StoryDetail = () => {
 	const [check, setcheck] = useState('T');
 	const [isSaveHistory, setSaveHistory] = useState('T');
 	const [isLoading, setIsLoading] = useState(true);
-	const { server, setServer } = useContext(ServerContext);
+	const { server } = useContext(ServerContext);
 	const [formats, setFormats] = useState([]);
 	const navigate = useNavigate();
 	const { encodedUrl, chap } = useParams();
@@ -27,7 +26,7 @@ export const StoryDetail = () => {
 	const decodeChap = decodeURIComponent(atob(chap));
 
 	if (!(decodeUrl[decodeUrl.length - 1] === '/')) {
-		decodeUrl += "/";
+		decodeUrl += '/';
 	}
 	const url = useState(decodeUrl + decodeChap)[0];
 
@@ -71,7 +70,7 @@ export const StoryDetail = () => {
 		const encodeChap = btoa(encodeURIComponent(temp));
 		navigate(`/story/${encodedUrl}/${encodeChap}`);
 		location.reload();
-	}
+	};
 
 
 
@@ -94,17 +93,17 @@ export const StoryDetail = () => {
 		const getFormats = async () => {
 			const data = await ExportService.getFormats();
 			if (data) setFormats(data);
-		}
+		};
 		getFormats();
 
 		const getChapter = async () => {
 			const data = await StoryDetailService.getChapter(url);
 			if (data) {
-				//setcheck('T');
+				// setcheck('T');
 				setChapter(data);
 			}
-			//else
-			//setcheck('F');
+			// else
+			// setcheck('F');
 		};
 		getChapter();
 		setIsLoading(true);
@@ -123,10 +122,10 @@ export const StoryDetail = () => {
 					setcheck('F');
 				}
 			}
-		}
-		//getUrlNewServer();
+		};
+		// getUrlNewServer();
 
-		//Promise.all([getUrlNewServer()]).then(() => setIsLoading(false));
+		// Promise.all([getUrlNewServer()]).then(() => setIsLoading(false));
 
 		if (historyReader) {
 			try {
@@ -146,13 +145,12 @@ export const StoryDetail = () => {
 			}
 			updatedHistory = [...updatedHistory, { title: Chapter.title, url: url, server: server, chapterNumber: Chapter.currentChapter.chapterNumber }];
 			setHistoryReader(updatedHistory);
-			console.log(updatedHistory);
 			setSaveHistory('F');
 			localStorage.setItem('historyReader', JSON.stringify(updatedHistory));
 		}
 	}, [historyReader, isSaveHistory, Chapter]);
 
-	
+
 	if (Chapter.currentChapter != null) {
 		title = Chapter.currentChapter.title;
 	}
@@ -303,12 +301,12 @@ export const StoryDetail = () => {
 														if (i === index) {
 															return (
 																<option className=' text-center' selected key={i} value={chap.url}>{chap.title}</option>
-															)
+															);
 														}
 														else {
 															return (
 																<option className=' text-center' key={i} value={chap.url}>{chap.title}</option>
-															)
+															);
 														}
 
 													})
@@ -437,5 +435,5 @@ export const StoryDetail = () => {
 
 		</div>
 
-	)
-}
+	);
+};

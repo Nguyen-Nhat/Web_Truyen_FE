@@ -1,27 +1,27 @@
-import { useState, useEffect,  useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { GenreService, BookService } from '../../utils'
-import { Breadcrumb, GenreList,  BookList } from '../../components';
+import { GenreService, BookService } from '../../utils';
+import { Breadcrumb, GenreList, BookList } from '../../components';
 import { ServerContext } from '../../context/ServerContext';
 import { Spinner } from '@material-tailwind/react';
-export const Search = ()=>{
+export const Search = () => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [books, setBooks] = useState([]);
 	const [genres, setGenres] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const { server } = useContext(ServerContext);
-	
+
 	const getPage = () => {
 		return +searchParams.get('page') || 1;
-	}
+	};
 	const getQuery = () => {
 		return searchParams.get('q');
-	}
+	};
 	const breadcrumbItems = [
         { name: `Tìm kiếm ${getQuery()}`, link: `/search?q=${getPage()}` },
     ];
 	useEffect(() => {
-		setSearchParams({ ...Object.fromEntries(searchParams.entries()), page: getPage() })
+		setSearchParams({ ...Object.fromEntries(searchParams.entries()), page: getPage() });
 	}, []);
 	useEffect(() => {
 		const getSearchResult = async () => {
@@ -29,14 +29,14 @@ export const Search = ()=>{
 			const query = searchParams.get('q');
 			const data = await BookService.searchByName(query, page);
 			setBooks(data);
-		}
+		};
 		const getGenres = async () => {
 			const data = await GenreService.getGenres();
 			if(data) setGenres(data);
-		}
+		};
 		setIsLoading(true);
 		Promise.all([getSearchResult(), getGenres()]).then(() => setIsLoading(false));
-	},[searchParams,server]); 
+	}, [searchParams, server]);
 	return (
 		<div className='mx-auto max-w-[1000px] mt-[20px]'>
 			<Breadcrumb items={breadcrumbItems} />
@@ -55,5 +55,5 @@ export const Search = ()=>{
 				)
 			}
 		</div>
-	)
-}
+	);
+};

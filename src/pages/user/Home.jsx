@@ -17,7 +17,7 @@ export const Home = () => {
 		const getGenres = async () => {
 			const data = await GenreService.getGenres();
 			if (data) setGenres(data);
-		}
+		};
 		setIsLoading(true);
 		Promise.all([getRecommendation(), getGenres()]).then(() => setIsLoading(false));
 	}, [server]);
@@ -59,5 +59,5 @@ export const Home = () => {
 				)
 			}
 		</div>
-	)
-}
+	);
+};

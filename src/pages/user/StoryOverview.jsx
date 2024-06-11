@@ -2,15 +2,15 @@ import { useParams, useLocation } from 'react-router-dom';
 import { Breadcrumb } from '../../components';
 import {
 	Typography, CardFooter
-} from "@material-tailwind/react"
-import { StarIcon, UserIcon, TagIcon, EyeIcon, ArrowPathIcon, Square2StackIcon } from "@heroicons/react/24/solid";
+} from '@material-tailwind/react';
+import { StarIcon, UserIcon, TagIcon, EyeIcon, ArrowPathIcon, Square2StackIcon } from '@heroicons/react/24/solid';
 import { useNavigate } from 'react-router-dom';
 import { OverviewService, BookService } from '../../utils';
 import { useState, useEffect, useContext } from 'react';
 import { ServerContext } from '../../context/ServerContext';
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Pagination } from '../../components/Pagination'
+import { Pagination } from '../../components/Pagination';
 import { Spinner } from '@material-tailwind/react';
 
 export const StoryOverview = () => {
@@ -41,17 +41,17 @@ export const StoryOverview = () => {
 		const getOverviewParams = async () => {
 			const data = await OverviewService.getOverviewService(decodeUrl);
 			if (data) setoverviewService(data);
-		}
+		};
 		const getChapterInfor = async () => {
 			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
 			if (data) setChapterInfor(data);
-		}
+		};
 		const getChapterInfor1 = async () => {
 			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
 			if (data) setChapterInfor1(data);
-		}
+		};
 		getRecommendation();
-		getOverviewParams()
+		getOverviewParams();
 		getChapterInfor();
 		getChapterInfor1();
 
@@ -71,7 +71,7 @@ export const StoryOverview = () => {
 					setcheck('F');
 				}
 			}
-		}
+		};
 		getUrlNewServer();
 		setIsLoading(true);
 		Promise.all([getUrlNewServer()]).then(() => setIsLoading(false));
@@ -80,7 +80,7 @@ export const StoryOverview = () => {
 		const getChapterInfor = async () => {
 			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
 			if (data) setChapterInfor(data);
-		}
+		};
 		getChapterInfor();
 		setIsLoading(true);
 		Promise.all([getChapterInfor()]).then(() => setIsLoading(false));
@@ -111,8 +111,8 @@ export const StoryOverview = () => {
 
 	function chuyenDoiKhongDau(chuoi) {
 		return chuoi
-			.normalize("NFD") // Chuẩn hóa ký tự Unicode
-			.replace(/[\u0300-\u036f]/g, "") // Loại bỏ dấu
+			.normalize('NFD') // Chuẩn hóa ký tự Unicode
+			.replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu
 			.replace(/đ/g, 'd') // Thay thế ký tự đặc biệt "đ"
 			.replace(/Đ/g, 'D') // Thay thế ký tự đặc biệt "Đ"
 			.toLowerCase() // Chuyển thành chữ thường
@@ -120,7 +120,7 @@ export const StoryOverview = () => {
 	}
 	let slug = overviewService.genre;
 	if (slug) {
-		let cacTu = slug.split(", ");
+		let cacTu = slug.split(', ');
 		slug = chuyenDoiKhongDau(cacTu[0]);
 	}
 	return (
@@ -149,7 +149,7 @@ export const StoryOverview = () => {
 													alt="Title" className='w-[180px] h-[180px]' />
 											</div>
 											<div className="col-span-3  ">
-												<Typography className='text-2xl text-red-500 text-center'>{overviewService.title ? overviewService.title.toUpperCase() : "null"}
+												<Typography className='text-2xl text-red-500 text-center'>{overviewService.title ? overviewService.title.toUpperCase() : 'null'}
 												</Typography>
 												<div className="flex items-center justify-center pb-2">
 													<Typography className='text-sm text-center '>
@@ -206,7 +206,7 @@ export const StoryOverview = () => {
 												</div>
 												<div className="flex items-center mt-2">
 													<EyeIcon className="h-6 w-6 flex-shrink-0" />
-													<Typography className='text-sl text-dark-500 ml-2'>{overviewService.totalViews === 0 ? "null" : overviewService.totalViews} </Typography>
+													<Typography className='text-sl text-dark-500 ml-2'>{overviewService.totalViews === 0 ? 'null' : overviewService.totalViews} </Typography>
 												</div>
 												<div className="flex items-center mt-2">
 													<ArrowPathIcon className="h-6 w-6 flex-shrink-0" />
@@ -238,7 +238,7 @@ export const StoryOverview = () => {
 														<div className="flex flex-col ml-2">
 															<Link to={`/story/${newEncodedUrl}`} className="hover:underline">
 																<Typography className='text-sm' onClick={() => window.location.href = `/story/${newEncodedUrl}`}>
-																	<i>{book.title ? book.title : "null"}</i>
+																	<i>{book.title ? book.title : 'null'}</i>
 																</Typography>
 															</Link>
 
@@ -257,7 +257,7 @@ export const StoryOverview = () => {
 															}
 
 														</div>
-													</div>)
+													</div>);
 											})
 										}
 									</div>
@@ -284,10 +284,10 @@ export const StoryOverview = () => {
 														<Typography
 															className='text-sm cursor-pointer '
 														>
-															{chap.title ? chap.title : "null"}
+															{chap.title ? chap.title : 'null'}
 														</Typography>
 													</div>
-												)
+												);
 											})
 
 										}
@@ -302,5 +302,5 @@ export const StoryOverview = () => {
 						)
 				)}
 		</div >
-	)
-}
+	);
+};

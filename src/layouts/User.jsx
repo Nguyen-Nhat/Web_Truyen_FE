@@ -1,8 +1,8 @@
-import { Routes, Route } from "react-router-dom"
-import {Header} from "../components/layout"
-import {Home, Search, StoryOverview,StoryDetail, Genre, Author} from '../pages/user'
-import { NotFound } from "../pages/NotFound"
-export function User(){
+import { Routes, Route } from 'react-router-dom';
+import {Header} from '../components/layout';
+import {Home, Search, StoryOverview, StoryDetail, Genre, Author} from '../pages/user';
+import { NotFound } from '../pages/NotFound';
+export function User() {
 	return (
 		<div>
 			<Header/>
@@ -16,5 +16,5 @@ export function User(){
 				<Route path="*" element={<NotFound/>}/>
 			</Routes>
 		</div>
-	)
+	);
 }

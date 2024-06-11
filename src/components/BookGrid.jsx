@@ -2,8 +2,8 @@
 import { Link } from 'react-router-dom';
 import {
 	Typography,
-} from "@material-tailwind/react"
-export function BookGrid({title, books}){
+} from '@material-tailwind/react';
+export function BookGrid({title, books}) {
 	return (
 		<div
 			className='max-w-full h-fit w-[680px] bg-white'
@@ -27,7 +27,7 @@ export function BookGrid({title, books}){
 								<Typography className='mt-2 text-center hover:underline'>{book.title}</Typography>
 							</Link>
 							{
-								book.author? (
+								book.author ? (
 									book.author.url ? (
 										<Link to={`/author/${btoa(encodeURIComponent(book.author.url))}?page=1`}>
 											<Typography className='mt-1 text-sm text-gray-500 hover:underline'>{book.author.name}</Typography>
@@ -40,7 +40,7 @@ export function BookGrid({title, books}){
 								) : null
 							}
 						</div>
-					)
+					);
 				})}
 			</div>
 		</div>

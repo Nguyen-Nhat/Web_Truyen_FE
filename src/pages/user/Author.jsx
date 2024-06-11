@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { GenreService, BookService } from '../../utils'
-import { Breadcrumb, GenreList,  BookList } from '../../components';
+import { GenreService, BookService } from '../../utils';
+import { Breadcrumb, GenreList, BookList } from '../../components';
 import { ServerContext } from '../../context/ServerContext';
 import { Spinner } from '@material-tailwind/react';
-export const Author = ()=>{
+export const Author = () => {
 	const { encodedUrl } = useParams();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [books, setBooks] = useState([]);
@@ -16,22 +16,22 @@ export const Author = ()=>{
     ];
 	useEffect(() => {
 		const page = searchParams.get('page') || 1;
-		setSearchParams({ ...Object.fromEntries(searchParams.entries()), page: page })
+		setSearchParams({ ...Object.fromEntries(searchParams.entries()), page: page });
 	}, []);
 	useEffect(() => {
 		const getSearchResult = async () => {
 			const page = searchParams.get('page') || '1';
 			const data = await BookService.getByAuthor(decodeURIComponent(atob(encodedUrl)), page);
 			setBooks(data);
-		}
+		};
 		const getGenres = async () => {
 			const data = await GenreService.getGenres();
 			if(data) setGenres(data);
-		}
+		};
 
 		setIsLoading(true);
 		Promise.all([getSearchResult(), getGenres()]).then(() => setIsLoading(false));
-	},[encodedUrl,searchParams, server]);
+	}, [encodedUrl, searchParams, server]);
 	return (
 		<div className='mx-auto max-w-[1000px] mt-[20px]'>
 			<Breadcrumb items={breadcrumbItems} />
@@ -48,5 +48,5 @@ export const Author = ()=>{
 				)
 			}
 		</div>
-	)
-}
+	);
+};

@@ -1,7 +1,7 @@
-import { HomeIcon } from '@heroicons/react/24/solid'; 
+import { HomeIcon } from '@heroicons/react/24/solid';
 import { Link } from 'react-router-dom';
-import {Typography} from "@material-tailwind/react";
-export function Breadcrumb({ items }){
+import {Typography} from '@material-tailwind/react';
+export function Breadcrumb({ items }) {
 	return (
 		<div className="breadcrumb h-[40px] text-sm flex items-center">
 			<Link to="/">
@@ -16,11 +16,11 @@ export function Breadcrumb({ items }){
 			</Link>
 			{items.map((item, index) => (
 				<span key={index} className='flex items-center'>
-						
+
 					<span
 						className='p-1'
 					>
-						&gt; 
+						&gt;
 					</span>
 					<Link to={item.link} >
 						<Typography
