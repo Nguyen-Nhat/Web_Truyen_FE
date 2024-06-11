@@ -1,24 +1,25 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Breadcrumb } from '../../components';
-import { useState, useEffect, useContext } from 'react';
-import { Cog8ToothIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect, useContext } from "react";
+import { Cog8ToothIcon } from "@heroicons/react/24/outline";
 import { ServerContext } from '../../context/ServerContext';
+import { ServerService } from "../../utils/ServerService";
 import { StoryDetailService, BookService, ExportService } from '../../utils';
 import { Spinner } from '@material-tailwind/react';
 import {
 	Typography,
-} from '@material-tailwind/react';
+} from "@material-tailwind/react";
 
 export const StoryDetail = () => {
 
-	let [historyReader, setHistoryReader] = useState(() => {
+	const [historyReader, setHistoryReader] = useState(() => {
 		const storedHistory = localStorage.getItem('historyReader');
 		return storedHistory ? JSON.parse(storedHistory) : [];
 	});
 	const [check, setcheck] = useState('T');
 	const [isSaveHistory, setSaveHistory] = useState('T');
 	const [isLoading, setIsLoading] = useState(true);
-	const { server } = useContext(ServerContext);
+	const { server} = useContext(ServerContext);
 	const [formats, setFormats] = useState([]);
 	const navigate = useNavigate();
 	const { encodedUrl, chap } = useParams();
@@ -26,7 +27,7 @@ export const StoryDetail = () => {
 	const decodeChap = decodeURIComponent(atob(chap));
 
 	if (!(decodeUrl[decodeUrl.length - 1] === '/')) {
-		decodeUrl += '/';
+		decodeUrl += "/";
 	}
 	const url = useState(decodeUrl + decodeChap)[0];
 
@@ -51,7 +52,7 @@ export const StoryDetail = () => {
 		return savedState !== null ? JSON.parse(savedState) : false;
 	});
 
-
+	const [indexRender, setIndexRender] = useState([]);
 	const [format, setFormat] = useState(() => localStorage.getItem('format') || '');
 	const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || 16);
 	const [fontFamily, setFontFamily] = useState(() => localStorage.getItem('fontFamily') || 'Arial');
@@ -62,7 +63,9 @@ export const StoryDetail = () => {
 
 	// Hàm xử lý thay đổi Chapter
 	const handleChapterChange = (e) => {
-		let temp = e.target.value;
+		const numberChap = e.target.value;
+		let temp = Chapter.chapters[parseInt(numberChap) - 1].url;
+		console.log(temp);
 		if (temp.endsWith('/')) {
 			temp = temp.slice(0, -1);
 		}
@@ -71,7 +74,6 @@ export const StoryDetail = () => {
 		navigate(`/story/${encodedUrl}/${encodeChap}`);
 		location.reload();
 	};
-
 
 
 
@@ -93,17 +95,17 @@ export const StoryDetail = () => {
 		const getFormats = async () => {
 			const data = await ExportService.getFormats();
 			if (data) setFormats(data);
-		};
+		}
 		getFormats();
 
 		const getChapter = async () => {
 			const data = await StoryDetailService.getChapter(url);
 			if (data) {
-				// setcheck('T');
+				//setcheck('T');
 				setChapter(data);
 			}
-			// else
-			// setcheck('F');
+			//else
+			//setcheck('F');
 		};
 		getChapter();
 		setIsLoading(true);
@@ -122,20 +124,12 @@ export const StoryDetail = () => {
 					setcheck('F');
 				}
 			}
-		};
-		// getUrlNewServer();
-
-		// Promise.all([getUrlNewServer()]).then(() => setIsLoading(false));
-
-		if (historyReader) {
-			try {
-				historyReader = JSON.parse(historyReader);
-			} catch (e) {
-				console.error('Error parsing jsonArrayFromStorage', e);
-			}
 		}
-		else {
-			historyReader = h;
+		//getUrlNewServer();
+
+		//Promise.all([getUrlNewServer()]).then(() => setIsLoading(false));
+		if (Chapter.currentChapter != null) {
+			setIndexRender(Chapter.currentChapter.chapterNumber - 1);
 		}
 
 		if (Chapter != null && Chapter.title != null && isSaveHistory == 'T') {
@@ -145,15 +139,19 @@ export const StoryDetail = () => {
 			}
 			updatedHistory = [...updatedHistory, { title: Chapter.title, url: url, server: server, chapterNumber: Chapter.currentChapter.chapterNumber }];
 			setHistoryReader(updatedHistory);
+			console.log(updatedHistory);
 			setSaveHistory('F');
 			localStorage.setItem('historyReader', JSON.stringify(updatedHistory));
 		}
-	}, [historyReader, isSaveHistory, Chapter]);
+	}, [isSaveHistory, Chapter, historyReader, indexRender]);
 
-
+	let chapters = [];
+	if (Chapter.chapters != null)
+		chapters = Chapter.chapters;
 	if (Chapter.currentChapter != null) {
 		title = Chapter.currentChapter.title;
 	}
+	
 	else if (Chapter.chapters != null) {
 		for (let i = 0; i < Chapter.chapters.length; i++) {
 			if (Chapter.chapters[i].url === Chapter.url)
@@ -167,10 +165,9 @@ export const StoryDetail = () => {
 
 
 
-	let index = 0;
-	if (Chapter.currentChapter != null) {
-		index = Chapter.currentChapter.chapterNumber - 1;
-	}
+
+	
+	
 
 
 	function handleChangePrevious() {
@@ -202,7 +199,6 @@ export const StoryDetail = () => {
 			}
 		}
 	}
-
 
 	const handleFormatChange = (event) => {
 		setFormat(event.target.value);
@@ -295,22 +291,14 @@ export const StoryDetail = () => {
 											<select
 												className="w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black]"
 												onChange={handleChapterChange}
+												value={Chapter.currentChapter.chapterNumber}
 											>
-												{
-													Chapter.chapters.map((chap, i) => {
-														if (i === index) {
-															return (
-																<option className=' text-center' selected key={i} value={chap.url}>{chap.title}</option>
-															);
-														}
-														else {
-															return (
-																<option className=' text-center' key={i} value={chap.url}>{chap.title}</option>
-															);
-														}
+												{Chapter.chapters.map(chap =>(<option className=' text-center' key={chap.url} value={chap.chapterNumber}>{chap.title}</option>)
+													)}
+												
 
-													})
-												}
+																							
+												
 											</select>
 
 										</div>
@@ -387,7 +375,7 @@ export const StoryDetail = () => {
 												<label className='flex justify-between'>
 													Chiều cao dòng:
 													<select value={lineHeight} onChange={handleLineHeightChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
-														{[0.5, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 2.25, 4.5, 4.75, 5].map(height => (
+														{[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5].map(height => (
 															<option key={height} value={height}>{height}</option>
 														))}
 													</select>
@@ -435,5 +423,5 @@ export const StoryDetail = () => {
 
 		</div>
 
-	);
-};
+	)
+}
