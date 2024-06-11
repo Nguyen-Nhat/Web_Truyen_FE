@@ -30,6 +30,7 @@ export const Home = () => {
 			urlStory: book.url.substring(0, book.url.lastIndexOf('/')),
 			urlChap: book.url.substring(book.url.lastIndexOf('/') + 1)
 		}));
+		list = list.reverse();
 
 	} else {
 		list = null;
@@ -52,7 +53,7 @@ export const Home = () => {
 							<GenreList genres={genres} />
 						</div>
 						<div className='flex  mt-[10px]'>
-							<RecentBookGrid title={`TRUYỆN ĐỌC GẦN ĐÂY`} books={list.reverse()} />
+							<RecentBookGrid title={`TRUYỆN ĐỌC GẦN ĐÂY`} books={list} />
 						</div>
 					</>
 				)
