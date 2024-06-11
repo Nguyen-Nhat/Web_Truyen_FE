@@ -1,4 +1,4 @@
-import { API_URL } from "./config";
+import { API_URL } from './config';
 
 export const OverviewService = {
     getOverviewService: async (decodeUrl) => {
@@ -10,7 +10,7 @@ export const OverviewService = {
             },
         });
         const data = await res.json();
-        //console.log("Test URL ovever", `${API_URL}/${server}/overview?url=${decodeUrl}`);
+        // console.log("Test URL ovever", `${API_URL}/${server}/overview?url=${decodeUrl}`);
         return data.data;
     },
     ChapterInforByPage: async (decodeUrl, page) => {
@@ -25,9 +25,9 @@ export const OverviewService = {
             },
         });
         const data = await res.json();
-        //console.log("Test URL page chapter", `${API_URL}/${server}/chapter?url=${decodeUrl}&page=${page}`);
-        //console.log("Test data Page", data.data)
+        // console.log("Test URL page chapter", `${API_URL}/${server}/chapter?url=${decodeUrl}&page=${page}`);
+        // console.log("Test data Page", data.data)
         return data.data;
     },
-}
+};
 

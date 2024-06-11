@@ -13,8 +13,21 @@ module.exports = {
 	plugins: ['react-refresh'],
 	rules: {
 		'react-refresh/only-export-components': [
-		'warn',
-		{ allowConstantExport: true },
+			'warn',
+			{ allowConstantExport: true },
 		],
+		'camelcase': ['error', { properties: 'always' }],
+		'indent': ['error', 4],
+		'quotes': ['error', 'single'],
+		'semi': ['error', 'always'],
+		'no-unused-vars': ['warn'],
+		'no-console': ['warn'],
+		'func-call-spacing': ['error', 'never'],
+		'arrow-spacing': ['error', { before: true, after: true }],
+		'no-multi-spaces': ['error'],
+		'spaced-comment': ['error', 'always', { markers: ['/'] }],
+		'no-trailing-spaces': ['error'],
+		'space-infix-ops': ['error'],
+		'space-in-parens': ['error', 'never'],
 	},
 }
