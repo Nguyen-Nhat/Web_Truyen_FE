@@ -35,7 +35,7 @@ export function RecentBookGrid({ title, books }) {
                                         <Typography className='text-base'>{book.title}</Typography>
                                     </Link>
                                 </div>
-                                <div className='ml-auto w-[150px]'>
+                                <div className='ml-auto w-[150px] flex-shrink-0'>
                                     <Typography className='text-base'>Chương {book.chapterNumber}</Typography>
                                     <Link to={`/story/${encodedUrlStory}/${encodedUrlChap}`} className='hover:underline' onClick={(event) => handleServer(event, book.server)}>
                                         <Typography className='text-sm text-gray-500'>
