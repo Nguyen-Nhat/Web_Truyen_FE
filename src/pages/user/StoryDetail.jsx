@@ -18,7 +18,7 @@ export const StoryDetail = ()=>{
 	const [formats, setFormats] = useState([]);
 	const navigate = useNavigate();
 	const { encodedUrl, chap } = useParams();
-    let decodeUrl = atob(encodedUrl);
+    let decodeUrl = decodeURIComponent(atob(encodedUrl));
     const decodeChap = atob(chap);
 	
 	if (!(decodeUrl[decodeUrl.length-1] === '/'))

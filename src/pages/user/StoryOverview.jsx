@@ -21,7 +21,7 @@ export const StoryOverview = () => {
 
 	const [overviewService, setoverviewService] = useState([]);
 	const [check, setcheck] = useState('T');
-	const decodeUrl = atob(encodedUrl)
+	const decodeUrl = decodeURIComponent(atob(encodedUrl));
 	const { server } = useContext(ServerContext);
 
 	const [chapterInforByPage, setChapterInfor] = useState([]);

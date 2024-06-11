@@ -21,7 +21,7 @@ export const Author = ()=>{
 	useEffect(() => {
 		const getSearchResult = async () => {
 			const page = searchParams.get('page') || '1';
-			const data = await BookService.getByAuthor(atob(encodedUrl), page);
+			const data = await BookService.getByAuthor(decodeURIComponent(atob(encodedUrl)), page);
 			setBooks(data);
 		}
 		const getGenres = async () => {

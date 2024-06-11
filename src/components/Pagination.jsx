@@ -39,7 +39,7 @@ export function Pagination({ pageLimit = 10 }) {
 				<ArrowLeftIcon strokeWidth={2} className="h-4 w-4" />
 			</IconButton>
 			<Typography color="gray" className="font-normal">
-				Page <strong className="text-gray-900">{pageOffset}</strong>
+				Page <strong className="text-gray-900">{pageOffset}</strong> of <strong className="text-gray-900">{pageLimit}</strong>
 			</Typography>
 			<IconButton
 				size="sm"

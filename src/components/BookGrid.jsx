@@ -17,7 +17,7 @@ export function BookGrid({title, books}){
 			</div>
 			<div className='grid grid-cols-4 gap-4 p-4'>
 				{books.map((book, index) => {
-					const encodedUrl = btoa(book.url);
+					const encodedUrl = btoa(encodeURIComponent(book.url));
 					return (
 						<div key={index} className='flex flex-col items-center hover:opacity-80'>
 							<Link to={`/story/${encodedUrl}`}>
@@ -26,7 +26,7 @@ export function BookGrid({title, books}){
 							<Link to={`/story/${encodedUrl}`}>
 								<Typography className='mt-2 text-center hover:underline'>{book.title}</Typography>
 							</Link>
-							<Link to={`/author/${btoa(book.author.url)}?page=1`}>
+							<Link to={`/author/${btoa(encodeURIComponent(book.author.url))}?page=1`}>
 								<Typography className='mt-1 text-sm text-gray-500 hover:underline'>{book.author.name}</Typography>
 							</Link>
 						</div>
