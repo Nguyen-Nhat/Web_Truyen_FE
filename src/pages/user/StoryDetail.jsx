@@ -12,7 +12,7 @@ import {
 
 export const StoryDetail = () => {
 
-	const [historyReader, setHistoryReader] = useState(() => {
+	let [historyReader, setHistoryReader] = useState(() => {
 		const storedHistory = localStorage.getItem('historyReader');
 		return storedHistory ? JSON.parse(storedHistory) : [];
 	});
@@ -136,7 +136,7 @@ export const StoryDetail = () => {
 			}
 		}
 		else {
-			historyReader = [];
+			historyReader = h;
 		}
 
 		if (Chapter != null && Chapter.title != null && isSaveHistory == 'T') {
@@ -152,15 +152,14 @@ export const StoryDetail = () => {
 		}
 	}, [historyReader, isSaveHistory, Chapter]);
 
-	const currentChapter = (Chapter.currentChapter != null) ? Chapter.currentChapter : false;
-	const chapters = (Chapter.chapters != null) ? Chapter.chapters : false;
+	
 	if (Chapter.currentChapter != null) {
 		title = Chapter.currentChapter.title;
 	}
-	else if (chapters != null) {
-		for (let i = 0; i < chapters.length; i++) {
-			if (chapters[i].url === Chapter.url)
-				title = chapters[i].title;
+	else if (Chapter.chapters != null) {
+		for (let i = 0; i < Chapter.chapters.length; i++) {
+			if (Chapter.chapters[i].url === Chapter.url)
+				title = Chapter.chapters[i].title;
 		}
 	}
 	const breadcrumbItems = [
@@ -178,8 +177,8 @@ export const StoryDetail = () => {
 
 	function handleChangePrevious() {
 		if (Chapter.currentChapter != null) {
-			if (Chapter.currentChapter.chapterNumber > 1 && chapters) {
-				let temp = chapters[Chapter.currentChapter.chapterNumber - 2].url;
+			if (Chapter.currentChapter.chapterNumber > 1 && Chapter.chapters) {
+				let temp = Chapter.chapters[Chapter.currentChapter.chapterNumber - 2].url;
 				if (temp.endsWith('/')) {
 					temp = temp.slice(0, -1);
 				}
@@ -193,8 +192,8 @@ export const StoryDetail = () => {
 
 	function handleChangeNext() {
 		if (Chapter.currentChapter != null) {
-			if (chapters && Chapter.currentChapter.chapterNumber < chapters.length + 1) {
-				let temp = chapters[Chapter.currentChapter.chapterNumber].url;
+			if (Chapter.chapters && Chapter.currentChapter.chapterNumber < Chapter.chapters.length + 1) {
+				let temp = Chapter.chapters[Chapter.currentChapter.chapterNumber].url;
 				if (temp.endsWith('/')) {
 					temp = temp.slice(0, -1);
 				}
@@ -268,9 +267,9 @@ export const StoryDetail = () => {
 									<Typography className="text-[red] text-3xl font-semibold  text-center m-1">
 										<span>{Chapter.title}</span>
 									</Typography>
-									{currentChapter && (
+									{Chapter.currentChapter && (
 										<Typography className="text-1xl font-semibold  text-center m-1" style={{ color: fontColor }}>
-											<span>{title}</span>
+											<span>{Chapter.currentChapter.title}</span>
 										</Typography>
 									)}
 
@@ -292,16 +291,15 @@ export const StoryDetail = () => {
 										&#60; Trước
 									</div>
 
-									{chapters && (
+									{Chapter.chapters && (
 
 										<div className="w-[200px]  text-black m-1">
 											<select
 												className="w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black]"
 												onChange={handleChapterChange}
-
 											>
 												{
-													chapters.map((chap, i) => {
+													Chapter.chapters.map((chap, i) => {
 														if (i === index) {
 															return (
 																<option className=' text-center' selected key={i} value={chap.url}>{chap.title}</option>
