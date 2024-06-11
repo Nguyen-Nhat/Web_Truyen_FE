@@ -58,9 +58,7 @@ export const StoryOverview = () => {
 		setIsLoading(true);
 		Promise.all([getRecommendation(), getOverviewParams(), getChapterInfor(), getChapterInfor1()]).then(() => setIsLoading(false));
 	}, []);
-	// if (overviewService.author) {
-	// 	console.log("Test overviews", overviewService.author.name);
-	// }
+
 	useEffect(() => {
 		const getUrlNewServer = async () => {
 			if (overviewService && Object.keys(overviewService).length > 0) {
@@ -184,7 +182,19 @@ export const StoryOverview = () => {
 											<div className="col-span-1  mb-2 border-r border-gray-500 border-dashed ">
 												<div className="flex items-center mt-2">
 													<UserIcon className="h-6 w-6 flex-shrink-0" />
-													<Typography className='text-sl text-dark-500 ml-2'>{overviewService.author ? overviewService.author.name : "null"}</Typography>
+													{
+														overviewService.author ? (
+															overviewService.author.url ? (
+																<Link to={`/author/${btoa(encodeURIComponent(overviewService.author.url))}?page=1`}>
+																	<Typography className='text-sl text-dark-500 ml-2 hover:underline'>{overviewService.author.name}</Typography>
+																</Link>
+															) : (
+																<div>
+																	<Typography className='text-sl text-dark-500 ml-2'>{overviewService.author.name}</Typography>
+																</div>
+															)
+														) : null
+													}
 												</div>
 												<div className="flex items-center mt-2">
 													<Square2StackIcon className="h-6 w-6 flex-shrink-0" />
@@ -231,9 +241,20 @@ export const StoryOverview = () => {
 																	<i>{book.title ? book.title : "null"}</i>
 																</Typography>
 															</Link>
-															<Typography className='text-[#2C7ABE] text-sm'>
-																<i>{book.author ? book.author.name : "null"}</i>
-															</Typography>
+
+															{
+																book.author ? (
+																	book.author.url ? (
+																		<Link to={`/author/${btoa(encodeURIComponent(book.author.url))}?page=1`}>
+																			<Typography className='text-[#2C7ABE] text-sm hover:underline'> <i> {book.author.name}</i></Typography>
+																		</Link>
+																	) : (
+																		<div>
+																			<Typography className='text-[#2C7ABE] text-sm'><i>{book.author.name}</i></Typography>
+																		</div>
+																	)
+																) : null
+															}
 
 														</div>
 													</div>)
