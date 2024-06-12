@@ -1,14 +1,15 @@
-
 import { Link } from 'react-router-dom';
+import { ServerContext } from "../context/ServerContext";
+import { useContext } from 'react';
 import {
     Typography,
 } from "@material-tailwind/react"
 export function RecentBookGrid({ title, books }) {
-    console.log(books);
+    const { server, setServer } = useContext(ServerContext);
     const handleServer = (event, server) => {
         localStorage.setItem('server', server)
+        setServer(server);
     };
-
     return (
         <div
             className='max-w-full h-fit w-[680px] bg-white mb-[50px]'
@@ -27,7 +28,6 @@ export function RecentBookGrid({ title, books }) {
                     books.map((book, i) => {
                         const encodedUrlStory = btoa(encodeURIComponent(book.urlStory));
                         const encodedUrlChap = btoa(encodeURIComponent(book.urlChap));
-
                         return (
                             <div className='flex items-center h-[74px] border-b my-1' key={i}>
                                 <div className='ml-4'>
@@ -35,7 +35,7 @@ export function RecentBookGrid({ title, books }) {
                                         <Typography className='text-base'>{book.title}</Typography>
                                     </Link>
                                 </div>
-                                <div className='ml-auto w-[150px]'>
+                                <div className='ml-auto w-[150px] flex-shrink-0'>
                                     <Typography className='text-base'>Chương {book.chapterNumber}</Typography>
                                     <Link to={`/story/${encodedUrlStory}/${encodedUrlChap}`} className='hover:underline' onClick={(event) => handleServer(event, book.server)}>
                                         <Typography className='text-sm text-gray-500'>
