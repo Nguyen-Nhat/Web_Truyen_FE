@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
-import {Pagination} from './Pagination';
+import { Pagination } from './Pagination';
 import { UserIcon } from '@heroicons/react/24/solid';
 import {
 	Typography,
 	CardFooter,
 } from '@material-tailwind/react';
 
-export function BookList({title, books}) {
+export function BookList({ title, books }) {
 	return (
 		<div
 			className='max-w-full h-fit w-[680px] bg-white'
@@ -42,12 +42,12 @@ export function BookList({title, books}) {
 										book.author ? (
 											book.author.url ? (
 												<Link to={`/author/${btoa(encodeURIComponent(book.author.url))}?page=1`} className='flex items-center hover:underline'>
-													<UserIcon className='h-5 w-5 p-1'/>
+													<UserIcon className='h-5 w-5 p-1' />
 													<Typography className='text-base text-gray-500'>{book.author.name}</Typography>
 												</Link>
 											) : (
 												<div className='flex items-center'>
-													<UserIcon className='h-5 w-5 p-1'/>
+													<UserIcon className='h-5 w-5 p-1' />
 													<Typography className='text-base text-gray-500'>{book.author.name}</Typography>
 												</div>
 											)
@@ -67,7 +67,7 @@ export function BookList({title, books}) {
 			}
 
 			<CardFooter className='mx-auto -mt-4'>
-				<Pagination pageLimit={books[0]?.maxPage || 1} />
+				<Pagination pageLimit={books && books[0]?.maxPage || 1} />
 			</CardFooter>
 		</div>
 	);
