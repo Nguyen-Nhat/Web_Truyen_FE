@@ -76,8 +76,8 @@ export const StoryDetail = () => {
 		return chuoi
 			.normalize('NFD') // Chuẩn hóa ký tự Unicode
 			.replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu
-			.replace(/đ/g, 'd') // Thay thế ký tự đặc biệt "đ"
-			.replace(/Đ/g, 'D') // Thay thế ký tự đặc biệt "Đ"
+			.replace(/đ/g, 'd') // Thay thế ký tự đặc biệt 'đ'
+			.replace(/Đ/g, 'D') // Thay thế ký tự đặc biệt 'Đ'
 			.toLowerCase() // Chuyển thành chữ thường
 			.replace(/\s+/g, '-'); // Thay thế khoảng trắng bằng dấu gạch nối
 	}
@@ -191,11 +191,6 @@ export const StoryDetail = () => {
 
 
 
-
-
-
-
-
 	function handleChangePrevious() {
 		if (Chapter.currentChapter != null) {
 			if (Chapter.currentChapter.chapterNumber > 1 && Chapter.chapters) {
@@ -269,12 +264,12 @@ export const StoryDetail = () => {
 			<Breadcrumb items={breadcrumbItems} />
 			{
 				isLoading ? (
-					<div className="flex items-center justify-center h-screen">
+					<div className='flex items-center justify-center h-screen'>
 						<Spinner />
 					</div>
 				) : (
 					check == 'F' ? (
-						<div className=" font-bold text-center col-span-9 p-4  flex flex-col" >
+						<div className=' font-bold text-center col-span-9 p-4  flex flex-col' >
 							Không tồn tại chương truyện tại server này !
 						</div>)
 
@@ -283,20 +278,20 @@ export const StoryDetail = () => {
 								className='w-full rounded-none  p-5' style={{ backgroundColor }}
 							>
 
-								<div className="border-dotted border-2 border-black w-full rounded-lg p-2  h-full">
-									<Typography className="text-[red] text-3xl font-semibold  text-center m-1">
+								<div className='border-dotted border-2 border-black w-full rounded-lg p-2  h-full'>
+									<Typography className='text-[red] text-3xl font-semibold  text-center m-1'>
 										<span>{Chapter.title}</span>
 									</Typography>
 									{Chapter.currentChapter && (
-										<Typography className="text-1xl font-semibold  text-center m-1" style={{ color: fontColor }}>
+										<Typography className='text-1xl font-semibold  text-center m-1' style={{ color: fontColor }}>
 											<span>{Chapter.currentChapter.title}</span>
 										</Typography>
 									)}
 
-									<Typography className="text-1xl  text-center m-1" style={{ color: fontColor }}>
+									<Typography className='text-1xl  text-center m-1' style={{ color: fontColor }}>
 										<span>{Chapter.author}</span>
 									</Typography>
-									<Typography className="text-1xl  text-center m-1" style={{ color: fontColor }}>
+									<Typography className='text-1xl  text-center m-1' style={{ color: fontColor }}>
 										<span>{Chapter.date ? new Date(Chapter.date).toLocaleString() : ''}</span>
 									</Typography>
 								</div>
@@ -305,7 +300,7 @@ export const StoryDetail = () => {
 
 								<div className='w-full flex justify-center mt-5'>
 									<div
-										className="w-[70px] h-[30px] rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
+										className='w-[70px] h-[30px] rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-pointer m-1'
 										onClick={handleChangePrevious}
 									>
 										&#60; Trước
@@ -313,37 +308,27 @@ export const StoryDetail = () => {
 
 									{Chapter.chapters && (
 
-										<div className="w-[200px]  text-black m-1">
+										<div className='w-[200px]  text-black m-1'>
 											<select
-												className="w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black]"
+												className='w-full h-[30px] focus:outline-none p-1 rounded border-solid border border-[black] cursor-pointer '
 												onChange={handleChapterChange}
 												value={Chapter.currentChapter.chapterNumber}
 											>
-												{Chapter.chapters.map(chap => (<option className=' text-center' key={chap.url} value={chap.chapterNumber}>{chap.title}</option>)
-													)}
-
-
-
-
+												{Chapter.chapters.map(chap => (<option className=' text-center' key={chap.url} value={chap.chapterNumber}>{chap.title}</option>))}
 											</select>
 
 										</div>
 									)}
 
-
-
-
-
-
 									<div
-										className="w-[40px] h-[30px]  rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
+										className='w-[40px] h-[30px]  rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-pointer  m-1'
 										onClick={handleShowConfigDisplay}
 									>
 										<Cog8ToothIcon className=' w-6 h-6' />
 									</div>
 
 									<div
-										className="w-[70px] h-[30px] rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-default m-1"
+										className='w-[70px] h-[30px] rounded-none bg-[#2779B0] flex items-center justify-center p-0 text-[white] hover:bg-[#66b4e8] cursor-pointer  m-1'
 										onClick={handleChangeNext}
 									>
 										Sau &#62;
@@ -360,7 +345,7 @@ export const StoryDetail = () => {
 											<div className='border-b border-dotted  border-[black] pt-3 pb-1 p-2 '>
 												<label className='flex justify-between'>
 													Kích cỡ chữ:
-													<select value={fontSize} onChange={handleFontSizeChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													<select value={fontSize} onChange={handleFontSizeChange} className='w-[280px] rounded border-solid border border-[black] text-black cursor-pointer '>
 														{[8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60].map(size => (
 															<option key={size} value={size}>{size}</option>
 														))}
@@ -370,7 +355,7 @@ export const StoryDetail = () => {
 											<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 '>
 												<label className='flex justify-between'>
 													Kiểu chữ:
-													<select value={fontFamily} onChange={handleFontFamilyChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													<select value={fontFamily} onChange={handleFontFamilyChange} className='w-[280px] rounded border-solid border border-[black] text-black cursor-pointer '>
 														{fontFamilies.map(font => (
 															<option key={font} value={font}>{font}</option>
 														))}
@@ -380,7 +365,7 @@ export const StoryDetail = () => {
 											<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 '>
 												<label className='flex justify-between'>
 													Màu nền:
-													<select value={backgroundColor} onChange={handleBackgroundColorChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													<select value={backgroundColor} onChange={handleBackgroundColorChange} className='w-[280px] rounded border-solid border border-[black] text-black cursor-pointer '>
 														{colors.map(color => (
 															<option key={color} value={color} style={{ backgroundColor: color }}>{color}</option>
 														))}
@@ -390,7 +375,7 @@ export const StoryDetail = () => {
 											<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 '>
 												<label className='flex justify-between'>
 													Màu chữ:
-													<select value={fontColor} onChange={handleFontColorChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													<select value={fontColor} onChange={handleFontColorChange} className='w-[280px] rounded border-solid border border-[black] text-black cursor-pointer '>
 														{colors.map(color => (
 															<option key={color} value={color} style={{ color: color }}>{color}</option>
 														))}
@@ -400,7 +385,7 @@ export const StoryDetail = () => {
 											<div className='border-b border-dotted  border-[black] pt-1 pb-1 p-2 mb-2'>
 												<label className='flex justify-between'>
 													Chiều cao dòng:
-													<select value={lineHeight} onChange={handleLineHeightChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													<select value={lineHeight} onChange={handleLineHeightChange} className='w-[280px] rounded border-solid border border-[black] text-black cursor-pointer '>
 														{[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5].map(height => (
 															<option key={height} value={height}>{height}</option>
 														))}
@@ -410,7 +395,7 @@ export const StoryDetail = () => {
 											<div className=' pt-0 pb-1 p-2 mb-2'>
 												<label className='flex justify-between'>
 													Định dạng file:
-													<select value={format} onChange={handleFormatChange} className='w-[280px] rounded border-solid border border-[black] text-black'>
+													<select value={format} onChange={handleFormatChange} className='w-[280px] rounded border-solid border border-[black] text-black cursor-pointer '>
 														{formats.map(format => (
 															<option key={format} value={format}>{format}</option>
 														))}
@@ -421,7 +406,7 @@ export const StoryDetail = () => {
 
 											<div className='flex justify-center'>
 												<div
-													className="w-[100px] h-[33px]  rounded bg-[#2779B0] text-center  text-[white] hover:bg-[#66b4e8] cursor-default mb-2 mt-0 m-1 p-1"
+													className='w-[100px] h-[33px]  rounded bg-[#2779B0] text-center  text-[white] hover:bg-[#66b4e8] cursor-pointer  mb-2 mt-0 m-1 p-1'
 													onClick={handleExport}
 												>
 													Xuất file
@@ -436,7 +421,7 @@ export const StoryDetail = () => {
 								)}
 
 
-								<div className="preview mt-5 p-2" style={{ fontSize: `${fontSize}px`, fontFamily, color: fontColor, lineHeight }}
+								<div className='preview mt-5 p-2' style={{ fontSize: `${fontSize}px`, fontFamily, color: fontColor, lineHeight }}
 									dangerouslySetInnerHTML={{ __html: Chapter.content }}
 								>
 
