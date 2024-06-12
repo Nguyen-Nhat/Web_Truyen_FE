@@ -1,14 +1,13 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Breadcrumb } from '../../components';
-import { useState, useEffect, useContext } from "react";
-import { Cog8ToothIcon } from "@heroicons/react/24/outline";
+import { useState, useEffect, useContext } from 'react';
+import { Cog8ToothIcon } from '@heroicons/react/24/outline';
 import { ServerContext } from '../../context/ServerContext';
-import { ServerService } from "../../utils/ServerService";
-import { StoryDetailService, BookService, ExportService } from '../../utils';
+import { StoryDetailService, BookService, ExportService, OverviewService } from '../../utils';
 import { Spinner } from '@material-tailwind/react';
 import {
 	Typography,
-} from "@material-tailwind/react";
+} from '@material-tailwind/react';
 
 export const StoryDetail = () => {
 
@@ -27,7 +26,7 @@ export const StoryDetail = () => {
 	const decodeChap = decodeURIComponent(atob(chap));
 
 	if (!(decodeUrl[decodeUrl.length - 1] === '/')) {
-		decodeUrl += "/";
+		decodeUrl += '/';
 	}
 	const url = useState(decodeUrl + decodeChap)[0];
 
@@ -65,7 +64,6 @@ export const StoryDetail = () => {
 	const handleChapterChange = (e) => {
 		const numberChap = e.target.value;
 		let temp = Chapter.chapters[parseInt(numberChap) - 1].url;
-		console.log(temp);
 		if (temp.endsWith('/')) {
 			temp = temp.slice(0, -1);
 		}
@@ -74,6 +72,15 @@ export const StoryDetail = () => {
 		navigate(`/story/${encodedUrl}/${encodeChap}`);
 		location.reload();
 	};
+	function chuyenDoiKhongDau(chuoi) {
+		return chuoi
+			.normalize('NFD') // Chuẩn hóa ký tự Unicode
+			.replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu
+			.replace(/đ/g, 'd') // Thay thế ký tự đặc biệt "đ"
+			.replace(/Đ/g, 'D') // Thay thế ký tự đặc biệt "Đ"
+			.toLowerCase() // Chuyển thành chữ thường
+			.replace(/\s+/g, '-'); // Thay thế khoảng trắng bằng dấu gạch nối
+	}
 
 
 
@@ -92,20 +99,56 @@ export const StoryDetail = () => {
 	}, [isHidden, fontSize, fontFamily, backgroundColor, fontColor, lineHeight]);
 
 	useEffect(() => {
+
+		const handleServerChange = async () => {
+			if (Chapter.title) {
+				const searchTitle = chuyenDoiKhongDau(Chapter.title.includes(' - ') ? Chapter.title.split(' - ')[0] : Chapter.title);
+
+				const data = await BookService.searchByName(searchTitle, 1);
+				if (data && data.length > 0) {
+					let storyUrl = data[0].url;
+					const chapInfo = await OverviewService.ChapterInforByPage(storyUrl, 1);
+					if (!storyUrl.endsWith('/'))
+						storyUrl += '/';
+					if (chapInfo) {
+						if (chapInfo.length < Chapter.currentChapter.chapterNumber) {
+							setcheck('F');
+							return;
+						}
+						const newUrl = chapInfo[Chapter.currentChapter.chapterNumber - 1].url;
+						const regex = new RegExp(storyUrl, 'g');
+						let chapUrl = newUrl.replace(regex, '');
+						storyUrl = storyUrl.slice(0, -1);
+						if (chapUrl.endsWith('/')) {
+							chapUrl = chapUrl.slice(0, -1);
+						}
+						window.location.href = (`/story/${btoa(encodeURIComponent(storyUrl))}/${btoa(encodeURIComponent(chapUrl))}`);
+					}
+				} else
+					setcheck('F');
+
+			}
+
+		};
+
+		handleServerChange();
+		setIsLoading(true);
+		Promise.all([handleServerChange()]).then(() => setIsLoading(false));
+	}, [server]);
+
+
+	useEffect(() => {
 		const getFormats = async () => {
 			const data = await ExportService.getFormats();
 			if (data) setFormats(data);
-		}
+		};
 		getFormats();
 
 		const getChapter = async () => {
 			const data = await StoryDetailService.getChapter(url);
 			if (data) {
-				//setcheck('T');
 				setChapter(data);
 			}
-			//else
-			//setcheck('F');
 		};
 		getChapter();
 		setIsLoading(true);
@@ -113,21 +156,7 @@ export const StoryDetail = () => {
 	}, [format]);
 
 	useEffect(() => {
-		const getUrlNewServer = async () => {
-			if (Chapter && Object.keys(overviewService).length > 0) {
-				const title = chuyenDoiKhongDau(overviewService.title.includes(' - ') ? overviewService.title.split(' - ')[0] : overviewService.title);
-				const data = await BookService.searchByName(title, 1);
-				if (data && data.length > 0) {
-					window.location.href = `/story/${btoa(encodeURIComponent(data[0].url))}`;
-				}
-				else {
-					setcheck('F');
-				}
-			}
-		}
-		//getUrlNewServer();
 
-		//Promise.all([getUrlNewServer()]).then(() => setIsLoading(false));
 		if (Chapter.currentChapter != null) {
 			setIndexRender(Chapter.currentChapter.chapterNumber - 1);
 		}
@@ -139,19 +168,16 @@ export const StoryDetail = () => {
 			}
 			updatedHistory = [...updatedHistory, { title: Chapter.title, url: url, server: server, chapterNumber: Chapter.currentChapter.chapterNumber }];
 			setHistoryReader(updatedHistory);
-			console.log(updatedHistory);
 			setSaveHistory('F');
 			localStorage.setItem('historyReader', JSON.stringify(updatedHistory));
 		}
 	}, [isSaveHistory, Chapter, historyReader, indexRender]);
 
-	let chapters = [];
-	if (Chapter.chapters != null)
-		chapters = Chapter.chapters;
+
 	if (Chapter.currentChapter != null) {
 		title = Chapter.currentChapter.title;
 	}
-	
+
 	else if (Chapter.chapters != null) {
 		for (let i = 0; i < Chapter.chapters.length; i++) {
 			if (Chapter.chapters[i].url === Chapter.url)
@@ -166,8 +192,8 @@ export const StoryDetail = () => {
 
 
 
-	
-	
+
+
 
 
 	function handleChangePrevious() {
@@ -209,7 +235,7 @@ export const StoryDetail = () => {
 		setFontSize(event.target.value);
 	};
 
-	const handleShowConfigDisplay = (e) => {
+	const handleShowConfigDisplay = () => {
 		setIsHidden(!isHidden);
 	};
 
@@ -231,7 +257,7 @@ export const StoryDetail = () => {
 	};
 
 	const handleExport = () => {
-		if (Chapter && Chapter.hasOwnProperty('content'))
+		if (Chapter && Chapter.content)
 			ExportService.postExport(format, Chapter.content);
 	};
 
@@ -249,7 +275,7 @@ export const StoryDetail = () => {
 				) : (
 					check == 'F' ? (
 						<div className=" font-bold text-center col-span-9 p-4  flex flex-col" >
-							Không tồn tại truyện tại server này !
+							Không tồn tại chương truyện tại server này !
 						</div>)
 
 						: Chapter && Object.keys(Chapter).length > 0 && (
@@ -293,12 +319,12 @@ export const StoryDetail = () => {
 												onChange={handleChapterChange}
 												value={Chapter.currentChapter.chapterNumber}
 											>
-												{Chapter.chapters.map(chap =>(<option className=' text-center' key={chap.url} value={chap.chapterNumber}>{chap.title}</option>)
+												{Chapter.chapters.map(chap => (<option className=' text-center' key={chap.url} value={chap.chapterNumber}>{chap.title}</option>)
 													)}
-												
 
-																							
-												
+
+
+
 											</select>
 
 										</div>
@@ -423,5 +449,5 @@ export const StoryDetail = () => {
 
 		</div>
 
-	)
-}
+	);
+};
