@@ -33,7 +33,7 @@ export function BookList({ title, books }) {
 						const encodedUrl = btoa(encodeURIComponent(book.url));
 						return (
 							<div className='flex items-center h-[74px] border-b my-1' key={i}>
-								<img src={book.coverImage} alt={book.title} className='w-[74px] h-[74px]' />
+								<img src={book.coverImage} alt={book.title} className='w-[74px] h-[74px] flex-shrink-0' />
 								<div className='ml-4'>
 									<Link to={`/story/${encodedUrl}`} className='hover:underline'>
 										<Typography className='text-base'>{book.title}</Typography>
@@ -54,7 +54,7 @@ export function BookList({ title, books }) {
 										) : null
 									}
 								</div>
-								<div className='ml-auto w-[150px]'>
+								<div className='ml-auto w-[150px] flex-shrink-0'>
 									<Typography className='text-base'>{book.lastChapter}</Typography>
 									<Typography className='text-sm text-gray-500'>
 										{differenceInDays} ngày trước
