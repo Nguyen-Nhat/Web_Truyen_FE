@@ -41,12 +41,8 @@ export const StoryOverview = () => {
 			const data = await OverviewService.getOverviewService(decodeUrl);
 			if (data) setoverviewService(data);
 		};
-		const getChapterInfor1 = async () => {
-			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
-			if (data) setChapterInfor1(data);
-		};
 		setIsLoading(prevState => ({ ...prevState, section1: true }));
-		Promise.all([getRecommendation(), getOverviewParams(), getChapterInfor1()]).then(() => setIsLoading(prevState => ({ ...prevState, section1: false })));
+		Promise.all([getRecommendation(), getOverviewParams()]).then(() => setIsLoading(prevState => ({ ...prevState, section1: false })));
 	}, []);
 
 	useEffect(() => {
@@ -70,6 +66,13 @@ export const StoryOverview = () => {
 		const getChapterInfor = async () => {
 			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
 			if (data) setChapterInfor(data);
+			if (page == 1) {
+				setChapterInfor1(data);
+			}
+			if (!chapterInforByPage1) {
+				const data1 = await OverviewService.ChapterInforByPage(decodeUrl, 1);
+				setChapterInfor1(data1);
+			}
 		};
 		setIsLoading(prevState => ({ ...prevState, section3: true }));
 		Promise.all([getChapterInfor()]).then(() => setIsLoading(prevState => ({ ...prevState, section3: false })));
