@@ -79,6 +79,7 @@ export const StoryDetail = () => {
 			.replace(/đ/g, 'd') // Thay thế ký tự đặc biệt 'đ'
 			.replace(/Đ/g, 'D') // Thay thế ký tự đặc biệt 'Đ'
 			.toLowerCase() // Chuyển thành chữ thường
+			.replace(/[^A-Za-z\s]/g, '')
 			.replace(/\s+/g, '-'); // Thay thế khoảng trắng bằng dấu gạch nối
 	}
 
@@ -131,7 +132,6 @@ export const StoryDetail = () => {
 
 		};
 
-		handleServerChange();
 		setIsLoading(true);
 		Promise.all([handleServerChange()]).then(() => setIsLoading(false));
 	}, [server]);
@@ -142,15 +142,12 @@ export const StoryDetail = () => {
 			const data = await ExportService.getFormats();
 			if (data) setFormats(data);
 		};
-		getFormats();
-
 		const getChapter = async () => {
 			const data = await StoryDetailService.getChapter(url);
 			if (data) {
 				setChapter(data);
 			}
 		};
-		getChapter();
 		setIsLoading(true);
 		Promise.all([getChapter(), getFormats()]).then(() => setIsLoading(false));
 	}, [format]);
