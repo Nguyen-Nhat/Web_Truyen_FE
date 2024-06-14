@@ -1,41 +1,37 @@
-import { useParams, useLocation } from 'react-router-dom';
 import { Breadcrumb } from '../../components';
 import {
 	Typography, CardFooter
 } from '@material-tailwind/react';
 import { StarIcon, UserIcon, TagIcon, EyeIcon, ArrowPathIcon, Square2StackIcon } from '@heroicons/react/24/solid';
-import { useNavigate } from 'react-router-dom';
 import { OverviewService, BookService } from '../../utils';
 import { useState, useEffect, useContext } from 'react';
 import { ServerContext } from '../../context/ServerContext';
 import { useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { Pagination } from '../../components/Pagination';
 import { Spinner } from '@material-tailwind/react';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 
 export const StoryOverview = () => {
 	const { encodedUrl } = useParams();
-	const location = useLocation();
-
-	const queryParams = new URLSearchParams(location.search);
-	const page = queryParams.get('page') || 1;
-
 	const [overviewService, setoverviewService] = useState([]);
 	const [check, setcheck] = useState('T');
 	const decodeUrl = decodeURIComponent(atob(encodedUrl));
-
 	const { server } = useContext(ServerContext);
-
 	const [chapterInforByPage, setChapterInfor] = useState([]);
 	const [booksReconmend, setBooks] = useState([]);
 	const [chapterInforByPage1, setChapterInfor1] = useState([]);
+	const [searchParams, setSearchParams] = useSearchParams();
 
 	const [isLoading, setIsLoading] = useState({
 		section1: true,
 		section2: true,
 		section3: true,
 	});
-
+	useEffect(() => {
+		const page = searchParams.get('page') || 1;
+		setSearchParams({ ...Object.fromEntries(searchParams.entries()), page: page });
+	}, []);
+	const page = searchParams.get('page') || '1';
 	useEffect(() => {
 		const getRecommendation = async () => {
 			const data = await BookService.getRecommendation();
@@ -45,49 +41,38 @@ export const StoryOverview = () => {
 			const data = await OverviewService.getOverviewService(decodeUrl);
 			if (data) setoverviewService(data);
 		};
-		const getChapterInfor = async () => {
-			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
-			if (data) setChapterInfor(data);
-		};
 		const getChapterInfor1 = async () => {
 			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
 			if (data) setChapterInfor1(data);
 		};
-		getRecommendation();
-		getOverviewParams();
-		getChapterInfor();
-		getChapterInfor1();
-
 		setIsLoading(prevState => ({ ...prevState, section1: true }));
-		Promise.all([getRecommendation(), getOverviewParams(), getChapterInfor(), getChapterInfor1()]).then(() => setIsLoading(prevState => ({ ...prevState, section1: false })));
+		Promise.all([getRecommendation(), getOverviewParams(), getChapterInfor1()]).then(() => setIsLoading(prevState => ({ ...prevState, section1: false })));
 	}, []);
 
 	useEffect(() => {
+		setIsLoading(prevState => ({ ...prevState, section2: true }));
 		const getUrlNewServer = async () => {
 			if (overviewService && Object.keys(overviewService).length > 0) {
 				const title = chuyenDoiKhongDau(overviewService.title.includes(' - ') ? overviewService.title.split(' - ')[0] : overviewService.title);
 				const data = await BookService.searchByName(title, 1);
-				if (data && data.length > 0) {
-					window.location.href = `/story/${btoa(encodeURIComponent(data[0].url))}`;
+				const index = findIndexTitle(title, data.map(data => data.title.includes(' - ') ? data.title.split(' - ')[0] : data.title));
+				if (data && data.length > 0 && index >= 0) {
+					window.location.href = `/story/${btoa(encodeURIComponent(data[index].url))}`;
 				}
 				else {
 					setcheck('F');
 				}
 			}
 		};
-		getUrlNewServer();
-		setIsLoading(prevState => ({ ...prevState, section2: true }));
-		Promise.all([getUrlNewServer()]).then(() => setIsLoading(prevState => ({ ...prevState, section2: false })));
+		getUrlNewServer().then(() => setIsLoading(prevState => ({ ...prevState, section2: false })));
 	}, [server]);
 	useEffect(() => {
 		const getChapterInfor = async () => {
 			const data = await OverviewService.ChapterInforByPage(decodeUrl, page);
 			if (data) setChapterInfor(data);
 		};
-		getChapterInfor();
 		setIsLoading(prevState => ({ ...prevState, section3: true }));
 		Promise.all([getChapterInfor()]).then(() => setIsLoading(prevState => ({ ...prevState, section3: false })));
-
 	}, [page]);
 
 	let temp1;
@@ -113,6 +98,15 @@ export const StoryOverview = () => {
 		targetRef.current.scrollIntoView({ behavior: 'smooth' });
 	};
 
+	function findIndexTitle(target, strings) {
+		for (let i = 0; i < strings.length; i++) {
+			if (target === chuyenDoiKhongDau(strings[i])) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	function chuyenDoiKhongDau(chuoi) {
 		return chuoi
 			.normalize('NFD') // Chuẩn hóa ký tự Unicode
@@ -120,7 +114,7 @@ export const StoryOverview = () => {
 			.replace(/đ/g, 'd') // Thay thế ký tự đặc biệt 'đ'
 			.replace(/Đ/g, 'D') // Thay thế ký tự đặc biệt 'Đ'
 			.toLowerCase() // Chuyển thành chữ thường
-			.replace(/\s+/g, '-'); // Thay thế khoảng trắng bằng dấu gạch nối
+			.replace(/\s+/g, '+'); // Thay thế khoảng trắng bằng dấu gạch nối
 	}
 	let slug = overviewService.genre;
 	if (slug) {
