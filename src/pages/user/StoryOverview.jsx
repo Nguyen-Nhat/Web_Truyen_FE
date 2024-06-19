@@ -117,6 +117,7 @@ export const StoryOverview = () => {
 			.replace(/đ/g, 'd') // Thay thế ký tự đặc biệt 'đ'
 			.replace(/Đ/g, 'D') // Thay thế ký tự đặc biệt 'Đ'
 			.toLowerCase() // Chuyển thành chữ thường
+			.replace(/[^A-Za-z0-9\s]/g, '')
 			.replace(/\s+/g, '+'); // Thay thế khoảng trắng bằng dấu gạch nối
 	}
 	let slug = overviewService.genre;

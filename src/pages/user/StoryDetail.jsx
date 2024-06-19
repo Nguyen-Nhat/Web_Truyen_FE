@@ -21,7 +21,7 @@ export const StoryDetail = () => {
 	const { server} = useContext(ServerContext);
 	const [formats, setFormats] = useState([]);
 	const navigate = useNavigate();
-	const { encodedUrl, chap } = useParams();
+	let { encodedUrl, chap } = useParams();
 	let decodeUrl = decodeURIComponent(atob(encodedUrl));
 	const decodeChap = decodeURIComponent(atob(chap));
 
@@ -72,6 +72,15 @@ export const StoryDetail = () => {
 		navigate(`/story/${encodedUrl}/${encodeChap}`);
 		location.reload();
 	};
+
+	function findIndexTitle(target, strings) {
+		for (let i = 0; i < strings.length; i++) {
+			if (target === chuyenDoiKhongDau(strings[i])) {
+				return i;
+			}
+		}
+		return -1;
+	}
 	function chuyenDoiKhongDau(chuoi) {
 		return chuoi
 			.normalize('NFD') // Chuẩn hóa ký tự Unicode
@@ -79,7 +88,7 @@ export const StoryDetail = () => {
 			.replace(/đ/g, 'd') // Thay thế ký tự đặc biệt 'đ'
 			.replace(/Đ/g, 'D') // Thay thế ký tự đặc biệt 'Đ'
 			.toLowerCase() // Chuyển thành chữ thường
-			.replace(/[^A-Za-z\s]/g, '')
+			.replace(/[^A-Za-z0-9\s]/g, '')
 			.replace(/\s+/g, '-'); // Thay thế khoảng trắng bằng dấu gạch nối
 	}
 
@@ -106,27 +115,35 @@ export const StoryDetail = () => {
 				const searchTitle = chuyenDoiKhongDau(Chapter.title.includes(' - ') ? Chapter.title.split(' - ')[0] : Chapter.title);
 
 				const data = await BookService.searchByName(searchTitle, 1);
-				if (data && data.length > 0) {
-					let storyUrl = data[0].url;
+				const index = findIndexTitle(searchTitle, data.map(data => data.title.includes(' - ') ? data.title.split(' - ')[0] : data.title));
+				
+				if (data && data.length > 0 && index >= 0) {
+					let storyUrl = data[index].url;
+					encodedUrl = btoa(encodeURIComponent(storyUrl));
+					console.log(encodedUrl);
 					const chapInfo = await OverviewService.ChapterInforByPage(storyUrl, 1);
+					let allChapter = [];
 					if (!storyUrl.endsWith('/'))
 						storyUrl += '/';
-					if (chapInfo) {
-						if (chapInfo.length < Chapter.currentChapter.chapterNumber) {
+					if (chapInfo && chapInfo.length > 0) {
+						allChapter = await StoryDetailService.getListAllChapter(`${chapInfo[0].url}`)
+					}
+					if (allChapter) {
+						if (allChapter.length < Chapter.currentChapter.chapterNumber) {
 							setcheck('F');
 							return;
 						}
-						const newUrl = chapInfo[Chapter.currentChapter.chapterNumber - 1].url;
-						const regex = new RegExp(storyUrl, 'g');
-						let chapUrl = newUrl.replace(regex, '');
-						storyUrl = storyUrl.slice(0, -1);
-						if (chapUrl.endsWith('/')) {
-							chapUrl = chapUrl.slice(0, -1);
+						let newUrl = allChapter[Chapter.currentChapter.chapterNumber - 1].url;
+						if (newUrl.endsWith('/')) {
+							newUrl = newUrl.slice(0, -1);
 						}
+						let chapUrl = newUrl.split('/').pop();
+						storyUrl = storyUrl.slice(0, -1);
 						window.location.href = (`/story/${btoa(encodeURIComponent(storyUrl))}/${btoa(encodeURIComponent(chapUrl))}`);
 					}
-				} else
+				} else {
 					setcheck('F');
+				}
 
 			}
 
@@ -161,7 +178,7 @@ export const StoryDetail = () => {
 		if (Chapter != null && Chapter.title != null && isSaveHistory == 'T') {
 			let updatedHistory = [];
 			if (Array.isArray(historyReader)) {
-				updatedHistory = historyReader.filter(item => item.title !== Chapter.title);
+				updatedHistory = historyReader.filter(item => chuyenDoiKhongDau(item.title) !== chuyenDoiKhongDau(Chapter.title));
 			}
 			updatedHistory = [...updatedHistory, { title: Chapter.title, url: url, server: server, chapterNumber: Chapter.currentChapter.chapterNumber }];
 			setHistoryReader(updatedHistory);
@@ -181,11 +198,15 @@ export const StoryDetail = () => {
 				title = Chapter.chapters[i].title;
 		}
 	}
-	const breadcrumbItems = [
+	let breadcrumbItems = [
 		{ name: `${Chapter.title}`, link: `/story/${encodedUrl}` },
 		{ name: `${title}` },
 	];
 
+	let breadcrumbItemsNotFindChapter = [		
+		{ name: `${Chapter.title}`},
+		{ name: `${title}` },
+	];
 
 
 	function handleChangePrevious() {
@@ -258,7 +279,6 @@ export const StoryDetail = () => {
 		<div
 			className='mx-auto w-[1000px] mt-[20px]'
 		>
-			<Breadcrumb items={breadcrumbItems} />
 			{
 				isLoading ? (
 					<div className='flex items-center justify-center h-screen'>
@@ -266,11 +286,17 @@ export const StoryDetail = () => {
 					</div>
 				) : (
 					check == 'F' ? (
-						<div className=' font-bold text-center col-span-9 p-4  flex flex-col' >
-							Không tồn tại chương truyện tại server này !
-						</div>)
-
+						<>
+							<Breadcrumb items={breadcrumbItemsNotFindChapter} />
+							<div className=' font-bold text-center col-span-9 p-4  flex flex-col' >
+								Không tồn tại chương truyện tại server này !
+							</div>
+						</>
+						)
 						: Chapter && Object.keys(Chapter).length > 0 && (
+							
+						<>
+						<Breadcrumb items={breadcrumbItems} />
 							<div
 								className='w-full rounded-none  p-5' style={{ backgroundColor }}
 							>
@@ -425,7 +451,7 @@ export const StoryDetail = () => {
 								</div>
 
 							</div>
-
+						</>
 						)
 				)}
 
