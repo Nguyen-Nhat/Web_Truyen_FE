@@ -106,7 +106,7 @@ export const StoryDetail = () => {
 		localStorage.setItem('isHidden', JSON.stringify(isHidden));
 
 
-	}, [isHidden, fontSize, fontFamily, backgroundColor, fontColor, lineHeight]);
+	}, [isHidden, fontSize, fontFamily, backgroundColor, fontColor, lineHeight, format]);
 
 	useEffect(() => {
 
@@ -167,7 +167,7 @@ export const StoryDetail = () => {
 		};
 		setIsLoading(true);
 		Promise.all([getChapter(), getFormats()]).then(() => setIsLoading(false));
-	}, [format]);
+	}, []);
 
 	useEffect(() => {
 
