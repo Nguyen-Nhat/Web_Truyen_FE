@@ -46,9 +46,10 @@ export const StoryOverview = () => {
 	}, []);
 
 	useEffect(() => {
-		setIsLoading(prevState => ({ ...prevState, section2: true }));
+		setcheck('T');
 		const getUrlNewServer = async () => {
 			if (overviewService && Object.keys(overviewService).length > 0) {
+				setIsLoading(prevState => ({ ...prevState, section2: true }));
 				const title = chuyenDoiKhongDau(overviewService.title.includes(' - ') ? overviewService.title.split(' - ')[0] : overviewService.title);
 				const data = await BookService.searchByName(title, 1);
 				const index = findIndexTitle(title, data.map(data => data.title.includes(' - ') ? data.title.split(' - ')[0] : data.title));
@@ -57,10 +58,14 @@ export const StoryOverview = () => {
 				}
 				else {
 					setcheck('F');
+					setIsLoading(prevState => ({ ...prevState, section2: false }))
 				}
 			}
+			else {
+				setIsLoading(prevState => ({ ...prevState, section2: false }))
+			}
 		};
-		getUrlNewServer().then(() => setIsLoading(prevState => ({ ...prevState, section2: false })));
+		getUrlNewServer()
 	}, [server]);
 	useEffect(() => {
 		const getChapterInfor = async () => {
