@@ -27,7 +27,7 @@ export const ExportService = {
         const url = window.URL.createObjectURL(new Blob([blob]));
         const a = document.createElement('a');
         a.href = url;
-        a.download = format == 'pdf' ? 'export_file.pdf' : 'export_file.epub';
+        a.download = `export_file.${format}`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
