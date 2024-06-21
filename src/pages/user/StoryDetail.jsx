@@ -112,6 +112,7 @@ export const StoryDetail = () => {
 
 		const handleServerChange = async () => {
 			if (Chapter.title) {
+				setIsLoading(true);
 				const searchTitle = chuyenDoiKhongDau(Chapter.title.includes(' - ') ? Chapter.title.split(' - ')[0] : Chapter.title);
 
 				const data = await BookService.searchByName(searchTitle, 1);
@@ -131,6 +132,7 @@ export const StoryDetail = () => {
 					if (allChapter) {
 						if (allChapter.length < Chapter.currentChapter.chapterNumber) {
 							setcheck('F');
+							setIsLoading(false);
 							return;
 						}
 						let newUrl = allChapter[Chapter.currentChapter.chapterNumber - 1].url;
@@ -143,14 +145,13 @@ export const StoryDetail = () => {
 					}
 				} else {
 					setcheck('F');
+					setIsLoading(false);
 				}
 
 			}
 
 		};
-
-		setIsLoading(true);
-		Promise.all([handleServerChange()]).then(() => setIsLoading(false));
+		handleServerChange();
 	}, [server]);
 
 
